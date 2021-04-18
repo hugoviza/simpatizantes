@@ -83,9 +83,9 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ asset('/usuarios') }}">
+                <a class="nav-link" href="{{ asset('/simpatizantes') }}">
                     <i class="fa fa-id-card" aria-hidden="true"></i>
-                    <span>Usuarios</span>
+                    <span>Simpatizantes</span>
                 </a>
             </li>
 
@@ -93,6 +93,13 @@
                 <a class="nav-link" href="{{ asset('/promotores') }}">
                     <i class="fa fa-users" aria-hidden="true"></i>
                     <span>Promotores</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ asset('/usuarios') }}">
+                    <i class="fa fa-id-card" aria-hidden="true"></i>
+                    <span>Usuarios</span>
                 </a>
             </li>
 

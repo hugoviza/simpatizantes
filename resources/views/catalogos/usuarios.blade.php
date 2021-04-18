@@ -38,7 +38,7 @@
     
             <div class="col-sm-12 mb-3">
                 <label for="txtPassword" class="form-label" id="label-txtPassword" >Contraseña</label>
-                <input type="text" class="form-control" id="txtPassword" placeholder="Ingrese contraseña" value="" required="" autocomplete="off">
+                <input type="text" class="form-control" id="txtPassword" placeholder="Ingrese contraseña" value="" required="" autocomplete="off" onkeypress="return ValidarNumerosYLetras(event)">
                 <div class="invalid-feedback">
                     Se requiere ingresar usuario.
                 </div>
@@ -61,7 +61,7 @@
                     <span class="icon text-white-50">
                         <i class="fas fa-plus"></i>
                     </span>
-                    <span class="text">Agregar</span>
+                    <span class="text" id="span-btn-guardar">Agregar</span>
                 </button>
 
                 <button class="btn btn-danger btn-icon-split float-right mr-2" style="display: none" id="btn-limpiar-formulario" onclick="limpiarFormulario()">
@@ -109,26 +109,60 @@
 <script>
     $(document).ready(() => {
         obtenerListaUsuarios();
-    })
+    });
+
     function validarFormulario() {
         let txtNombre = document.getElementById("txtNombre").value.trim();
         let txtUsuario = document.getElementById("txtUsuario").value.trim();
+        let txtPassword = document.getElementById("txtPassword");
         let lstNivelAcceso = document.getElementById("lstNivelAcceso").value.trim();
 
-        if(!txtNombre.length || !txtUsuario.length || !lstNivelAcceso.length) {
+        if(!txtNombre.length || !txtUsuario.length || !lstNivelAcceso.length || (txtPassword.getAttribute("required") != null && !txtPassword.value.trim().length)) {
             let contenedor = document.getElementById("contenedor-formulario");
             if(!contenedor.classList.contains('was-validated')) {
                 contenedor.classList.add('was-validated');
             }
         } else {
-            registrarUsuario();
+            guardarUsuario();
         }
     }
 
-    function registrarUsuario() {
-        let txtNombre = document.getElementById("txtNombre").value.trim();
-        let txtUsuario = document.getElementById("txtUsuario").value.trim();
-        let lstNivelAcceso = document.getElementById("txtNombre").value.trim();
+    function guardarUsuario() {
+        let hdnUsuario = document.getElementById("hdnUsuario");
+        let txtNombre = document.getElementById("txtNombre");
+        let txtUsuario = document.getElementById("txtUsuario");
+        let txtPassword = document.getElementById("txtPassword");
+        let lstNivelAcceso = document.getElementById("lstNivelAcceso");
+
+        $.ajax({
+            method: "PUT",
+            url: "{{ asset('/usuarios') }}",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                idUsuario: hdnUsuario.value,
+                nombre: txtNombre.value,
+                usuario: txtUsuario.value,
+                password: txtPassword.value,
+                nivelAcceso: lstNivelAcceso.value,
+            },
+            beforeSend: () => {
+                abrirLoading();
+            },
+            success: (response) => {
+                console.log("guardarUsuario >>> ", response);
+                swal("", response, "success");
+                limpiarFormulario();
+                obtenerListaUsuarios();
+            },
+            error: (error, status) => {
+                console.log("error", error);
+                obtenerListaUsuarios();
+                swal("", error.responseText, "error");
+            }
+        });
+
     }
 
     function obtenerListaUsuarios() {
@@ -157,15 +191,15 @@
                                     <i class="fas fa-edit"></i>
                                 </button>
                             ${usuario.activo ?
-                                `<button class="btn btn-warning btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Bloquear">
+                                `<button class="btn btn-warning btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Bloquear" onclick="onClick_bloquearUsuario('${usuario.idUsuario}', 0, '${usuario.usuario}')">
                                     <i class="fas fa-ban"></i>
                                 </button>`
                                 :
-                                `<button class="btn btn-success btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Desbloquear">
+                                `<button class="btn btn-success btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Desbloquear" onclick="onClick_bloquearUsuario('${usuario.idUsuario}', 1, '${usuario.usuario}')">
                                     <i class="fas fa-ban"></i>
                                 </button>`
                             }
-                                <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar">
+                                <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarUsuario('${usuario.idUsuario}','${usuario.usuario}');">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -198,13 +232,17 @@
             success: (arrayUsuarios) => {
 
                 if(arrayUsuarios.length > 0) {
+                    limpiarFormulario();
+
                     // seteamos los datos para edición
                     document.getElementById("hdnUsuario").value = arrayUsuarios[0].idUsuario;
                     document.getElementById("btn-limpiar-formulario").style.display = "";
                     document.getElementById("label-txtPassword").innerHTML = "Cambiar contraseña";
                     document.getElementById("txtNombre").value = arrayUsuarios[0].nombre;
+                    document.getElementById("txtPassword").removeAttribute("required");
                     document.getElementById("txtUsuario").value = arrayUsuarios[0].usuario;
                     document.getElementById("lstNivelAcceso").value = arrayUsuarios[0].nivelAcceso;
+                    document.getElementById("span-btn-guardar").innerHTML = "Guardar";
                 }
                 swal.close();
             },
@@ -215,7 +253,110 @@
         });
     }
 
+    function onClick_bloquearUsuario(idUsuario, activo, usuario) {
+        
+        //Primero preguntamos si se requiere bloquear
+        swal({
+            title: `¿Estás seguro de ${activo == 1 ? "desbloquear" : "bloquear"} al usuario ${usuario}?`,
+            text: "",
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "Cancelar",
+                    value: false,
+                    visible: true,
+                    className: "btn",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: `Si, ${activo == 1 ? "desbloquear" : "bloquear"}`,
+                    value: true,
+                    visible: true,
+                    className: "btn btn-danger",
+                    closeModal: true
+                }
+            },
+        })
+        .then((sayYes) => {
+            if (sayYes) {
+                $.ajax({
+                    method: "POST",
+                    url: "{{ asset('/usuarios/bloquear') }}",
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {idUsuario, activo},
+                    beforeSend: () => {
+                        abrirLoading();
+                    },
+                    success: (response) => {
+                        obtenerListaUsuarios();
+                        swal("", response, "success");
+                    },
+                    error: (error, status) => {
+                        console.log("error", error);
+                        swal("", error.responseText, "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function onClick_eliminarUsuario(idUsuario, usuario) {
+        
+        //Primero preguntamos si se requiere bloquear
+        swal({
+            title: `¿Estás seguro eliminar al usuario ${usuario}?`,
+            text: "",
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "Cancelar",
+                    value: false,
+                    visible: true,
+                    className: "btn",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: `Si, Eliminar`,
+                    value: true,
+                    visible: true,
+                    className: "btn btn-danger",
+                    closeModal: true
+                }
+            },
+        })
+        .then((sayYes) => {
+            if (sayYes) {
+                $.ajax({
+                    method: "DELETE",
+                    url: "{{ asset('/usuarios') }}",
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {idUsuario},
+                    beforeSend: () => {
+                        abrirLoading();
+                    },
+                    success: (response) => {
+                        obtenerListaUsuarios();
+                        swal("", response, "success");
+                    },
+                    error: (error, status) => {
+                        console.log("error", error);
+                        swal("", error.responseText, "error");
+                    }
+                });
+            }
+        });
+    }
+
     function limpiarFormulario() {
+        let contenedor = document.getElementById("contenedor-formulario");
+        if(contenedor.classList.contains('was-validated')) {
+            contenedor.classList.remove('was-validated');
+        }
+
         document.getElementById("hdnUsuario").value = "";
         document.getElementById("btn-limpiar-formulario").style.display = "none";
         document.getElementById("label-txtPassword").innerHTML = "Contraseña";
@@ -223,6 +364,8 @@
         document.getElementById("txtUsuario").value = "";
         document.getElementById("lstNivelAcceso").value = "";
         document.getElementById("txtPassword").value = "";
+        document.getElementById("txtPassword").setAttribute("required", true);
+        document.getElementById("span-btn-guardar").innerHTML = "Agregar";
     }
 
     function ValidarNumerosYLetras(e) {

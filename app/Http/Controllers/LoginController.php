@@ -16,7 +16,7 @@ class LoginController extends Controller
     //api
     public function login(Request $request)
     {
-        $users = DB::select('select * from tblusuario where usuario = ?', [$request->txtUsuario]);
+        $users = DB::select('SELECT * FROM tblusuario WHERE usuario = ?', [$request->txtUsuario]);
         
         if(sizeof($users) == 0) {
             return response()->json("usuario no encontrado", 404);
