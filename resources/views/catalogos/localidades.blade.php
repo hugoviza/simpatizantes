@@ -114,7 +114,7 @@
                                     <button class="btn btn-primary btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Editar" onclick="onClick_editarLocalidad('${localidad.idLocalidad}')">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarLocalidad('${localidad.idLocalidad}','${localidad.localidad}');">
+                                    <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarLocalidad('${localidad.idLocalidad}','${addSlashes(localidad.localidad)}');">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

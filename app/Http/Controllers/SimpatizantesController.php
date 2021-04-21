@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
 
 class SimpatizantesController extends Controller
 {
@@ -204,5 +206,12 @@ class SimpatizantesController extends Controller
         );
 
         return response()->json($arraySimpatizantes, 200);
+    }
+
+    public function subirDocumento(Request $request) {
+        $filename = "documento_".time();
+
+        return response()->json($request, 200);
+        //Storage::disk('local')->put('example.txt', 'Contents');
     }
 }

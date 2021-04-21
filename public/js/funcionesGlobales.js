@@ -40,3 +40,7 @@ function isNumber(evt) {
     }
     return true;
 }
+
+function addSlashes(text) {
+    return (text+'').replace(/([\\"'])/g, "\\$1").replace(/\0/g, "\\0");
+}

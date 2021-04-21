@@ -191,15 +191,15 @@
                                     <i class="fas fa-edit"></i>
                                 </button>
                             ${usuario.activo ?
-                                `<button class="btn btn-warning btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Bloquear" onclick="onClick_bloquearUsuario('${usuario.idUsuario}', 0, '${usuario.usuario}')">
+                                `<button class="btn btn-warning btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Bloquear" onclick="onClick_bloquearUsuario('${usuario.idUsuario}', 0, '${addSlashes(usuario.usuario)}')">
                                     <i class="fas fa-ban"></i>
                                 </button>`
                                 :
-                                `<button class="btn btn-success btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Desbloquear" onclick="onClick_bloquearUsuario('${usuario.idUsuario}', 1, '${usuario.usuario}')">
+                                `<button class="btn btn-success btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Desbloquear" onclick="onClick_bloquearUsuario('${usuario.idUsuario}', 1, '${addSlashes(usuario.usuario)}')">
                                     <i class="fas fa-ban"></i>
                                 </button>`
                             }
-                                <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarUsuario('${usuario.idUsuario}','${usuario.usuario}');">
+                                <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarUsuario('${usuario.idUsuario}','${addSlashes(usuario.usuario)}');">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>

@@ -55,6 +55,7 @@ Route::middleware(['isLogin'])->group(function () {
     Route::post('/simpatizantes', [SimpatizantesController::class, 'listar']);
     Route::put('/simpatizantes', [SimpatizantesController::class, 'guardar']);
     Route::delete('/simpatizantes', [SimpatizantesController::class, 'eliminar']);
+    Route::put('/simpatizantes/documentos', [SimpatizantesController::class, 'subirDocumento']);
 
     //PROMOTORES
     Route::get('/promotores', [PromotoresController::class, 'index'])->name('promotores');

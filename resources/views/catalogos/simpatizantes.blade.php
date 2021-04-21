@@ -346,7 +346,7 @@
                                     <button class="btn btn-primary btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Editar" onclick="onClick_editarSimpatizante('${simpatizante.idSimpatizante}')">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarSimpatizante('${simpatizante.idSimpatizante}','${simpatizante.nombre}');">
+                                    <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarSimpatizante('${simpatizante.idSimpatizante}','${ addSlashes(simpatizante.nombre) }');">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

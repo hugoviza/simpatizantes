@@ -14,7 +14,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Localidades</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalLocalidades }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fa fa-map-marker fa-2x text-gray-300" aria-hidden="true"></i>
@@ -32,7 +32,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Secciones</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"> {{ $totalSecciones }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fa fa-map fa-2x text-gray-300" aria-hidden="true"></i>
@@ -50,7 +50,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Promotores
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"> {{ $totalPromotores }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fa fa-users fa-2x text-gray-300" aria-hidden="true"></i>
@@ -68,7 +68,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Simpatizantes</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalSimpatizantes }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fa fa-users fa-2x text-gray-300" aria-hidden="true"></i>
@@ -99,10 +99,81 @@
                         <th>Documentos</th>
                     </tr>
                 </thead>
+                <tbody id="table-body-simpatizantes">
 
+                </tbody>
             </table>
         </div>
     </div>
 
+    <script>
+        $(document).ready(() => {
+            listarSimpatizantes();
+        });
 
+        function listarSimpatizantes() {
+            $.ajax({
+                method: "POST",
+                url: "{{ asset('/simpatizantes') }}",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {},
+                beforeSend: () => {
+                    console.log("enviando");
+                },
+                success: (arraySimpatizantes) => {
+
+                    let tableBody = document.getElementById("table-body-simpatizantes");
+                    if(arraySimpatizantes.length > 0) {
+                        let html = '';
+                        arraySimpatizantes.forEach(simpatizante => {
+                            html += `<tr>
+                                <td>${simpatizante.nombre} ${simpatizante.apellidoPaterno} ${simpatizante.apellidoMaterno}</td>
+                                <td>${simpatizante.curp}</td>
+                                <td>${simpatizante.claveElector}</td>
+                                <td>${simpatizante.numeroElector}</td>
+                                <td>${simpatizante.claveSeccion}</td>
+                                <td>${simpatizante.localidad}</td>
+                                <td>${armarDomicilio(simpatizante)} </td>
+                                <td>${simpatizante.telefono}</td>
+                                <td>${simpatizante.promotor}</td>
+                                <td style="text-align: center">
+                                </td>
+                            </tr>`;
+                        });
+                        tableBody.innerHTML = html;
+                        $('[data-toggle="tooltip"]').tooltip();
+                    } else {
+                        tableBody.innerHTML = `<tr><td colspan="10">No se encontraron simpatizantes</td></tr>`;
+                    }
+                },
+                error: (error, status) => {
+                    console.log("error", error);
+                    swal("", error.responseText, "error");
+                }
+            });
+        }
+
+        function armarDomicilio(promotor) {
+            let domicilio = "";
+
+            if(promotor.domicilio != "") 
+                domicilio += promotor.domicilio;
+
+            if(promotor.numExt != "") 
+                domicilio += (" #" + promotor.numExt);
+
+            if(promotor.numInt != "") 
+                domicilio += (" int. " + promotor.numInt);
+
+            if(promotor.colonia != "") 
+                domicilio += (", " + promotor.colonia);
+            
+            if(promotor.codigoPostal != "") 
+                domicilio += (", " + promotor.codigoPostal);
+
+                return domicilio;
+        }
+    </script>
 @endsection

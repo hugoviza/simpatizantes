@@ -304,7 +304,7 @@
                                     <button class="btn btn-primary btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Editar" onclick="onClick_editarPromotor('${promotor.idPromotor}')">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarPromotor('${promotor.idPromotor}','${promotor.nombre}');">
+                                    <button class="btn btn-danger btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Eliminar" onclick="onClick_eliminarPromotor('${promotor.idPromotor}','${addSlashes(promotor.nombre)}');">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
