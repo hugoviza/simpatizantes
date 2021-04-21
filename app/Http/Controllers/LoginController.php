@@ -19,20 +19,20 @@ class LoginController extends Controller
         $users = DB::select('SELECT * FROM tblusuario WHERE usuario = ?', [$request->txtUsuario]);
         
         if(sizeof($users) == 0) {
-            return response()->json("usuario no encontrado", 404);
+            return response("usuario no encontrado", 404);
         }
         
         if($users[0]->activo != 1) {
-            return response()->json("usuario inactivo", 401);
+            return response("usuario inactivo", 401);
         }
 
         if($users[0]->password != md5($request->txtPassword)) {
-            return response()->json("Contraseña incorrecta", 401);
+            return response("Contraseña incorrecta", 401);
         }
 
         $session = new SessionController();
         $session->setSession($request, $users[0]);
         
-        return response()->json("Sesión iniciada correctamente", 200);
+        return response("Sesión iniciada correctamente", 200);
     }
 }

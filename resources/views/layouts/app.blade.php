@@ -33,7 +33,12 @@
 
     <script src="{{ asset('plantilla_admin/js/sweetalert.min.js') }}"></script>
 
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    {{-- <link rel="stylesheet" href="/resources/demos/style.css"> --}}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+    <script src="{{ asset('js/funcionesGlobales.js') }}"></script>
 
     <style>
         .form-label {
@@ -66,15 +71,16 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" href="{{ asset('/') }}">
-                    <i class="fa fa-list" aria-hidden="true"></i>
-                    <span>Reportes</span></a>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+            @if ($session->get('nivelAcceso') === 'admin')
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ asset('/') }}">
+                        <i class="fa fa-list" aria-hidden="true"></i>
+                        <span>Reportes</span></a>
+                </li>
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+            @endif
 
             <!-- Heading -->
             <div class="sidebar-heading">
@@ -89,33 +95,37 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ asset('/promotores') }}">
-                    <i class="fa fa-users" aria-hidden="true"></i>
-                    <span>Promotores</span>
-                </a>
-            </li>
+            @if ($session->get('nivelAcceso') === 'admin')
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ asset('/usuarios') }}">
-                    <i class="fa fa-id-card" aria-hidden="true"></i>
-                    <span>Usuarios</span>
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ asset('/promotores') }}">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <span>Promotores</span>
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ asset('/secciones') }}">
-                    <i class="fa fa-map" aria-hidden="true"></i>
-                    <span>Secciones</span>
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ asset('/usuarios') }}">
+                        <i class="fa fa-id-card" aria-hidden="true"></i>
+                        <span>Usuarios</span>
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ asset('/localidades') }}">
-                    <i class="fa fa-map-marker" aria-hidden="true"></i>
-                    <span>Localidades</span>
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ asset('/secciones') }}">
+                        <i class="fa fa-map" aria-hidden="true"></i>
+                        <span>Secciones</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ asset('/localidades') }}">
+                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                        <span>Localidades</span>
+                    </a>
+                </li>
+                
+            @endif
 
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -204,31 +214,6 @@
         $(document).ready(() => {
             $('[data-toggle="tooltip"]').tooltip();
         })
-
-        function abrirLoading(mensaje = 'Cargando..') {
-            let divSpinner = document.createElement('div');
-            divSpinner.innerHTML = '<span class="text-center"></span>';
-            divSpinner.classList.add('spinner-border');
-            divSpinner.classList.add('text-primary');
-            divSpinner.setAttribute('role', 'status');
-
-            let divMensaje = document.createElement('div');
-            divMensaje.innerHTML = 'Cargando...';
-            divMensaje.classList.add("text-center");
-            divMensaje.classList.add("mt-4");
-
-            let divContenedor = document.createElement('div');
-            divContenedor.appendChild(divSpinner);
-            divContenedor.appendChild(divMensaje);
-
-            swal({ 
-                content: divContenedor,
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                buttons: false,
-                className: 'swal-width-sm'
-            });
-        }
     </script>
     
     

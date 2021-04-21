@@ -124,13 +124,13 @@ class UsuariosController extends Controller
         }
 
         //validamos que el usuario no haya registrado simpatizantes
-        $simpatizantes = DB::select('SELECT count(*) AS totalSimpatizantes from tblsimpatizantes WHERE idUsuario = ?', [$request->idUsuario]);
+        $simpatizantes = DB::select('SELECT count(*) AS totalSimpatizantes from tblsimpatizante WHERE idUsuario = ?', [$request->idUsuario]);
 
         if($simpatizantes[0]->totalSimpatizantes == 0) {
             DB::delete('DELETE FROM tblusuario WHERE idUsuario = ?', [$request->idUsuario]);
             return response("Usuario eliminado correctamente", 200);
         } else {
-            return response("No es posible eliminar al usuario seleccionado, el usuario tiene $simpatizantes[0]->totalSimpatizantes simpatizantes registrados", 400);
+            return response("No es posible eliminar al usuario seleccionado, el usuario tiene {$simpatizantes[0]->totalSimpatizantes} simpatizantes registrados", 400);
         }
 
     }

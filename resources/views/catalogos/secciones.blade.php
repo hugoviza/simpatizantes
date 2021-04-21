@@ -21,7 +21,7 @@
             <div class="col-sm-12 mb-3">
                 <label for="txtClaveSeccion" class="form-label">Clave sección</label>
                 <input type="hidden" name="" id="hdnSeccion" value="">
-                <input type="text" class="form-control" id="txtClaveSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return ValidarNumerosYLetras(event)">
+                <input type="text" class="form-control" id="txtClaveSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
                 <div class="invalid-feedback">
                     Se requiere ingresar clave de la sección
                 </div>
@@ -258,15 +258,6 @@
             document.getElementById("txtClaveSeccion").value = "";
             document.getElementById("btn-limpiar-formulario").style.display = "none";
             document.getElementById("span-btn-guardar").innerHTML = "Agregar";
-        }
-
-        function ValidarNumerosYLetras(e) {
-            var keyCode = e.keyCode || e.which;
-            //Regex for Valid Characters i.e. Alphabets and Numbers.
-            var regex = /^[A-Za-z0-9]+$/;
-            //Validate TextBox value against the Regex.
-            var isValid = regex.test(String.fromCharCode(keyCode));
-            return isValid;
         }
     </script>
 @endsection

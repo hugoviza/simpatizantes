@@ -79,13 +79,29 @@ class LocalidadesController extends Controller
         }
 
         //validamos que la localidad no este en uso
-        $simpatizantes = DB::select('SELECT count(*) AS totalSimpatizantes from tblsimpatizantes WHERE idLocalidad = ?', [$request->idLocalidad]);
+        $simpatizantes = DB::select('SELECT count(*) AS totalSimpatizantes from tblsimpatizante WHERE idLocalidad = ?', [$request->idLocalidad]);
 
         if($simpatizantes[0]->totalSimpatizantes == 0) {
             DB::delete('DELETE FROM tbllocalidad WHERE idLocalidad = ?', [$request->idLocalidad]);
             return response("Localidad eliminada correctamente", 200);
         } else {
-            return response("No es posible eliminar a la localidad seleccionada, la localidad contiene $simpatizantes[0]->totalSimpatizantes simpatizantes registrados", 400);
+            return response("No es posible eliminar a la localidad seleccionada, la localidad contiene {$simpatizantes[0]->totalSimpatizantes} simpatizantes registrados", 400);
         }
+    }
+
+    public function autocomplete(Request $request) {
+        $busqueda = str_replace(' ', '|', $request->txtBusqueda);
+        $resultados = DB::select(
+            "SELECT 
+                CONCAT(claveLocalidad, ' ', localidad) AS label,
+                idLocalidad AS value
+            FROM
+                tbllocalidad
+            WHERE
+                CONCAT(claveLocalidad, ' ', localidad) REGEXP '$busqueda'
+            order by localidad;"
+        );
+
+        return response()->json($resultados, 200);
     }
 }

@@ -73,13 +73,26 @@ class SeccionesController extends Controller
         }
 
         //validamos que la localidad no este en uso
-        $simpatizantes = DB::select('SELECT count(*) AS totalSimpatizantes from tblsimpatizantes WHERE idSeccion = ?', [$request->idSeccion]);
+        $simpatizantes = DB::select('SELECT count(*) AS totalSimpatizantes from tblsimpatizante WHERE idSeccion = ?', [$request->idSeccion]);
 
         if($simpatizantes[0]->totalSimpatizantes == 0) {
             DB::delete('DELETE FROM tblseccion WHERE idSeccion = ?', [$request->idSeccion]);
             return response("Sección eliminada correctamente", 200);
         } else {
-            return response("No es posible eliminar a la sección seleccionada, la sección contiene $simpatizantes[0]->totalSimpatizantes simpatizantes registrados", 400);
+            return response("No es posible eliminar a la sección seleccionada, la sección contiene {$simpatizantes[0]->totalSimpatizantes} simpatizantes registrados", 400);
         }
+    }
+
+    public function autocomplete(Request $request) {
+        $resultados = DB::select(
+            "SELECT 
+                claveSeccion AS label, idSeccion AS value
+            FROM
+                tblseccion
+            WHERE
+                claveSeccion LIKE '%$request->txtBusqueda%';"
+        );
+
+        return response()->json($resultados, 200);
     }
 }

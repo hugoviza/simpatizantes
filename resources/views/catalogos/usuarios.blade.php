@@ -345,6 +345,7 @@
                     error: (error, status) => {
                         console.log("error", error);
                         swal("", error.responseText, "error");
+                        obtenerListaUsuarios();
                     }
                 });
             }
@@ -367,16 +368,6 @@
         document.getElementById("txtPassword").setAttribute("required", true);
         document.getElementById("span-btn-guardar").innerHTML = "Agregar";
     }
-
-    function ValidarNumerosYLetras(e) {
-        var keyCode = e.keyCode || e.which;
-        //Regex for Valid Characters i.e. Alphabets and Numbers.
-        var regex = /^[A-Za-z0-9]+$/;
-        //Validate TextBox value against the Regex.
-        var isValid = regex.test(String.fromCharCode(keyCode));
-        return isValid;
-    }
-
 </script>
 
 @endsection
