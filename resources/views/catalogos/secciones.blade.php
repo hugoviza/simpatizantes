@@ -19,7 +19,7 @@
             </div>
 
             <div class="col-sm-12 mb-3">
-                <label for="txtClaveSeccion" class="form-label">Clave sección</label>
+                <label for="txtClaveSeccion" class="form-label">Clave sección*</label>
                 <input type="hidden" name="" id="hdnSeccion" value="">
                 <input type="text" class="form-control" id="txtClaveSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
                 <div class="invalid-feedback">

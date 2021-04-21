@@ -20,7 +20,7 @@
             </div>
 
             <div class="col-sm-12 mb-3">
-                <label for="txtLocalidad" class="form-label">Localidad</label>
+                <label for="txtLocalidad" class="form-label">Localidad*</label>
                 <input type="hidden" name="" id="hdnLocalidad" value="">
                 <input type="text" class="form-control" id="txtLocalidad" placeholder="Ingrese descripción de localidad" value="" required="" autocomplete="off">
                 <div class="invalid-feedback">

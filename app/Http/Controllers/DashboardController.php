@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     public function index(Request $request) {
-        return view('consultas.consultaSimpatizantes', ['session' => $request->session()]);
+        if($request->session()->get('nivelAcceso') == 'admin') {
+            return view('consultas.consultaSimpatizantes', ['session' => $request->session()]);
+        } else {
+            return view('catalogos.simpatizantes', ['session' => $request->session()]);
+        }
     }
 }

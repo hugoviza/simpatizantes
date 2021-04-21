@@ -52,14 +52,14 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-4 mb-3">
                                 <label for="txtCurp" class="form-label">CURP</label>
-                                <input type="text" class="form-control" id="txtCurp" placeholder="Ingrese CURP" value="" autocomplete="off" onkeypress="return ValidarNumerosYLetras(event)">
+                                <input type="text" class="form-control" id="txtCurp" placeholder="Ingrese CURP" value="" autocomplete="off" onkeypress="return ValidarNumerosYLetras(event)" onkeyup="this.value = this.value.toUpperCase();" maxlength="18">
                                 <div class="invalid-feedback">
                                     Se requiere ingresar CURP de promotor.
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-4 mb-3">
                                 <label for="txtClaveElector" class="form-label">Clave de elector*</label>
-                                <input type="text" class="form-control" id="txtClaveElector" placeholder="Ingrese clave de elector" value="" required="" autocomplete="off" onkeypress="return ValidarNumerosYLetras(event);">
+                                <input type="text" class="form-control" id="txtClaveElector" placeholder="Ingrese clave de elector" value="" required="" autocomplete="off" onkeypress="return ValidarNumerosYLetras(event);" onkeyup="this.value = this.value.toUpperCase();" maxlength="18">
                                 <div class="invalid-feedback">
                                     Se requiere ingresar clave de elector de promotor.
                                 </div>
@@ -76,7 +76,7 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-4 mb-3">
                                 <label for="txtCelular" class="form-label">Celular*</label>
-                                <input type="text" class="form-control" id="txtCelular" placeholder="Ingrese número celular" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+                                <input type="text" class="form-control" id="txtCelular" placeholder="Ingrese número celular" value="" required="" autocomplete="off" onkeypress="return isNumber(event)" maxlength="10">
                                 <div class="invalid-feedback">
                                     Se requiere ingresar número de celular de promotor.
                                 </div>
@@ -100,14 +100,14 @@
                             </div>
                             <div class="col-sm-6 col-md-2 mb-3">
                                 <label for="txtNumeroExterior" class="form-label" title="Número exterior">Núm. exterior*</label>
-                                <input type="text" class="form-control" id="txtNumeroExterior" placeholder="Núm. exterior" value="" required="" autocomplete="off" onkeypress="">
+                                <input type="text" class="form-control" id="txtNumeroExterior" placeholder="Núm. exterior" value="" required="" autocomplete="off" onkeypress="" maxlength="5">
                                 <div class="invalid-feedback">
                                     Se requiere ingresar número exterior del domicilio.
                                 </div>
                             </div>
                             <div class="col-sm-6 col-md-2 mb-3">
                                 <label for="txtNumeroInterior" class="form-label">Núm. interior</label>
-                                <input type="text" class="form-control" id="txtNumeroInterior" placeholder="Núm. interior" value="" autocomplete="off" onkeypress="">
+                                <input type="text" class="form-control" id="txtNumeroInterior" placeholder="Núm. interior" value="" autocomplete="off" onkeypress="" maxlength="5">
                                 <div class="invalid-feedback">
                                     Se requiere ingresar número interior del domicilio.
                                 </div>
@@ -125,7 +125,7 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-4 mb-3">
                                 <label for="txtCodigoPostal" class="form-label">Código postal</label>
-                                <input type="text" class="form-control" id="txtCodigoPostal" placeholder="Ingrese código postal" value="" autocomplete="off" onkeypress="return isNumber(event)">
+                                <input type="text" class="form-control" id="txtCodigoPostal" placeholder="Ingrese código postal" value="" autocomplete="off" onkeypress="return isNumber(event)" maxlength="5">
                                 <div class="invalid-feedback">
                                     Se requiere ingresar código postal de promotor.
                                 </div>

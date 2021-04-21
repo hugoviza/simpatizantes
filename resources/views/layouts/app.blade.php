@@ -95,14 +95,16 @@
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="{{ asset('/promotores') }}">
+                    <i class="fa fa-users" aria-hidden="true"></i>
+                    <span>Promotores</span>
+                </a>
+            </li>
+
+            
             @if ($session->get('nivelAcceso') === 'admin')
 
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ asset('/promotores') }}">
-                        <i class="fa fa-users" aria-hidden="true"></i>
-                        <span>Promotores</span>
-                    </a>
-                </li>
 
                 <li class="nav-item">
                     <a class="nav-link" href="{{ asset('/usuarios') }}">

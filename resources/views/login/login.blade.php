@@ -99,7 +99,7 @@
                 },
                 error: (error, status) => {
                     console.log("error", error)
-                    swal("",error.responseJSON, "error")
+                    swal("",error.responseText, "error")
                 }
             })
         }
