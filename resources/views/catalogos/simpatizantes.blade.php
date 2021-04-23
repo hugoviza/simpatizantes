@@ -158,6 +158,23 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-md-6">
+                                <label for="txtSeccion" class="form-label">Documento 1</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file1" accept="image/x-png,image/jpeg,application/pdf" onchange="validarDocumento(this)">
+                                    <label class="custom-file-label" for="file1">Seleccione IMAGEN / PDF</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="txtSeccion" class="form-label">Documento 2</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file2" accept="image/x-png,image/jpeg,application/pdf" onchange="validarDocumento(this)">
+                                    <label class="custom-file-label" for="file2">Seleccione IMAGEN / PDF</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
                             <div class="col-sm-12 mb-3">
                                 <button class="btn btn-primary btn-icon-split float-right" onclick="validarFormulario()">
                                     <span class="icon text-white-50">
@@ -220,6 +237,11 @@
 
         $(document).ready(() => {
             obtenerListaSimpatizantes();
+
+            $(".custom-file-input").on("change", function() {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            });
 
             $("#txtPromotor").autocomplete({
                 source: function( request, response ) {
@@ -335,13 +357,13 @@
                             html += `<tr>
                                 <td>${simpatizante.nombre} ${simpatizante.apellidoPaterno} ${simpatizante.apellidoMaterno}</td>
                                 <td>${simpatizante.curp}</td>
-                                <td>${simpatizante.claveElector}</td>
-                                <td>${simpatizante.numeroElector}</td>
-                                <td>${simpatizante.telefono}</td>
+                                <td>${simpatizante.claveElector || ''}</td>
+                                <td>${simpatizante.numeroElector || ''}</td>
+                                <td>${simpatizante.telefono || ''}</td>
                                 <td>${armarDomicilio(simpatizante)} </td>
-                                <td>${simpatizante.localidad}</td>
-                                <td>${simpatizante.claveSeccion}</td>
-                                <td>${simpatizante.promotor}</td>
+                                <td>${simpatizante.localidad || ''}</td>
+                                <td>${simpatizante.claveSeccion || ''}</td>
+                                <td>${simpatizante.promotor || ''}</td>
                                 <td style="text-align: center">
                                     <button class="btn btn-primary btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Editar" onclick="onClick_editarSimpatizante('${simpatizante.idSimpatizante}')">
                                         <i class="fas fa-edit"></i>
@@ -434,46 +456,54 @@
             let txtSeccion = document.getElementById("txtSeccion").value.trim();
             let hdnPromotor = document.getElementById("hdnPromotor").value.trim();
 
-            $.ajax({
-                method: "PUT",
-                url: "{{ asset('/simpatizantes') }}",
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: {
-                    idSimpatizante: hdnSimpatizante,
-                    idLocalidad: hdnLocalidad,
-                    idSeccion: hdnSeccion,
-                    nombre: txtNombre,
-                    apellidoMaterno: txtApellidoMaterno,
-                    apellidoPaterno: txtApellidoPaterno,
-                    domicilio: txtDireccion,
-                    numExt: txtNumeroExterior,
-                    numInt: txtNumeroInterior,
-                    colonia: txtColonia,
-                    codigoPostal: txtCodigoPostal,
-                    claveElector: txtClaveElector,
-                    numeroElector: txtNumeroElector,
-                    curp: txtCurp,
-                    seccion: txtSeccion,
-                    localidad: txtLocalidad,
-                    telefono: txtCelular,
-                    idPromotor: hdnPromotor,
-                },
-                beforeSend: () => {
-                    abrirLoading();
-                },
-                success: (response) => {
-                    console.log("guardarSimpatizante >>> ", response);
-                    swal("", response, "success");
-                    limpiarFormulario();
-                    obtenerListaSimpatizantes();
-                },
-                error: (error, status) => {
-                    console.log("error", error);
-                    obtenerListaSimpatizantes();
-                    swal("", error.responseText, "error");
-                }
+            subirDocumentos()
+            .then((arrayDocumentos) => {
+                $.ajax({
+                    method: "PUT",
+                    url: "{{ asset('/simpatizantes') }}",
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        idSimpatizante: hdnSimpatizante,
+                        idLocalidad: hdnLocalidad,
+                        idSeccion: hdnSeccion,
+                        nombre: txtNombre,
+                        apellidoMaterno: txtApellidoMaterno,
+                        apellidoPaterno: txtApellidoPaterno,
+                        domicilio: txtDireccion,
+                        numExt: txtNumeroExterior,
+                        numInt: txtNumeroInterior,
+                        colonia: txtColonia,
+                        codigoPostal: txtCodigoPostal,
+                        claveElector: txtClaveElector,
+                        numeroElector: txtNumeroElector,
+                        curp: txtCurp,
+                        seccion: txtSeccion,
+                        localidad: txtLocalidad,
+                        telefono: txtCelular,
+                        idPromotor: hdnPromotor,
+                        arrayDocumentos
+                    },
+                    beforeSend: () => {
+                        abrirLoading();
+                    },
+                    success: (response) => {
+                        console.log("guardarSimpatizante >>> ", response);
+                        swal("", response, "success");
+                        limpiarFormulario();
+                        obtenerListaSimpatizantes();
+                    },
+                    error: (error, status) => {
+                        console.log("error", error);
+                        obtenerListaSimpatizantes();
+                        swal("", error.responseText, "error");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+                swal('', 'Error al guardar', 'error');
             });
         }
 
@@ -600,6 +630,63 @@
 
             document.getElementById("btn-limpiar-formulario").style.display = "none";
             document.getElementById("span-btn-guardar").innerHTML = "Agregar";
+            $("#file1").val('');
+            $("#file2").val('');
+            $("#file1").siblings(".custom-file-label").addClass("selected").html('Seleccione IMAGEN / PDF');
+            $("#file2").siblings(".custom-file-label").addClass("selected").html('Seleccione IMAGEN / PDF');
+
+        }
+
+        function validarDocumento(input) {
+            let arrayNombre = input.value.trim().split('.');
+            let arrayExtensionesPermitidas = ['pdf', 'jpg', 'png', 'jpeg'];
+            if(!arrayExtensionesPermitidas.includes(arrayNombre[arrayNombre.length - 1].toLowerCase())) {
+                swal('', 'El tipo de documento seleccionado no está permitido, solo se permiten documentos con extensiones pdf, jpg, png, jpeg' , 'error');
+                input.value = null;
+                // $(input).siblings(".custom-file-label").removeClass("selected").html('Seleccione IMAGEN / PDF');
+            }
+        }
+
+        function subirDocumentos() {
+            var formData = new FormData();
+            var files1 = $('#file1')[0].files;
+            var files2 = $('#file2')[0].files;
+            
+            // Check file selected or not
+            if(files1.length > 0 ) {
+                formData.append('file1',files1[0]);
+            }
+            
+            if(files2.length > 0 ) {
+                formData.append('file2',files2[0]);
+            }
+
+            return new Promise((resolve, reject) => {
+
+                if(files1.length == 0 && files1.length == 0) {
+                    resolve(['','']);
+                }
+                $.ajax({
+                    method: "post",
+                    url: "{{ asset('/simpatizantes/documentos') }}",
+                    // url: "http://localhost/test/upload.php",
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: () => {
+                        abrirLoading();
+                    },
+                    success: (response) => {
+                        resolve(response);
+                    },
+                    error: (error, status) => {
+                        reject(error.responseText);
+                    }
+                });
+            });
         }
     </script>
 @endsection

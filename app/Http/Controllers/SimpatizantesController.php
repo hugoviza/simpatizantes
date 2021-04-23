@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-
+use PDF;
 
 class SimpatizantesController extends Controller
 {
@@ -15,7 +15,34 @@ class SimpatizantesController extends Controller
 
     public function listar(Request $request) {
 
-        if(isset($request->idSimpatizante)) {
+        $strFiltros = '';
+        $arrayValoresFiltros = array();
+        if($request->idSimpatizante != '') {
+            $strFiltros .= ' AND simp.idSimpatizante = ?';
+            array_push($arrayValoresFiltros, $request->idSimpatizante);
+        }
+
+        if($request->nombre != '') {
+            $strFiltros .= " AND concat(simp.nombre, ' ', simp.apellidoPaterno, ' ', simp.apellidoMaterno) regexp ?";
+            array_push($arrayValoresFiltros, str_replace(' ', '|', $request->nombre));
+        }
+
+        if($request->idPromotor != '') {
+            $strFiltros .= ' AND simp.idPromotor = ?';
+            array_push($arrayValoresFiltros, $request->idPromotor);
+        }
+
+        if($request->idSeccion != '') {
+            $strFiltros .= ' AND simp.idSeccion = ?';
+            array_push($arrayValoresFiltros, $request->idSeccion);
+        }
+
+        if($request->idLocalidad != '') {
+            $strFiltros .= ' AND simp.idLocalidad = ?';
+            array_push($arrayValoresFiltros, $request->idLocalidad);
+        }
+
+        if($strFiltros != '') {
             $promotores = DB::select(
                 "SELECT 
                     simp.idSimpatizante,
@@ -39,7 +66,9 @@ class SimpatizantesController extends Controller
                     ifnull(sec.claveSeccion, '') claveSeccion,
                     ifnull(claveLocalidad, '') claveLocalidad,
                     ifnull(loc.localidad, '') localidad,
-                    CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor
+                    CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor,
+                    ifnull(GROUP_CONCAT(docs.url SEPARATOR '|sep|'), '') as docsURL,
+                    ifnull(GROUP_CONCAT(docs.nombre SEPARATOR '|sep|'), '') as docsNames
                 FROM
                     tblsimpatizante AS simp
                         LEFT JOIN
@@ -48,8 +77,11 @@ class SimpatizantesController extends Controller
                     tbllocalidad AS loc USING (idLocalidad)
                         LEFT JOIN
                     tblsimpatizante as prom on prom.idSimpatizante = simp.idPromotor
-                WHERE simp.idSimpatizante = ?
-                AND ifnull(simp.bitPromotor,0) <> 1", [$request->idSimpatizante]);
+                        LEFT JOIN
+                    tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
+                WHERE ifnull(simp.bitPromotor,0) <> 1
+                $strFiltros
+                GROUP BY idSimpatizante", $arrayValoresFiltros);
         } else {
             // $limit = 
             $promotores = DB::select(
@@ -75,7 +107,9 @@ class SimpatizantesController extends Controller
                     ifnull(sec.claveSeccion, '') claveSeccion,
                     ifnull(claveLocalidad, '') claveLocalidad,
                     ifnull(loc.localidad, '') localidad,
-                    CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor
+                    CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor,
+                    ifnull(GROUP_CONCAT(docs.url SEPARATOR '|sep|'), '') as docsURL,
+                    ifnull(GROUP_CONCAT(docs.nombre SEPARATOR '|sep|'), '') as docsNames
                 FROM
                     tblsimpatizante as simp
                         LEFT JOIN
@@ -84,7 +118,12 @@ class SimpatizantesController extends Controller
                     tbllocalidad AS loc USING (idLocalidad)
                         LEFT JOIN
                     tblsimpatizante as prom on prom.idSimpatizante = simp.idPromotor
-                WHERE ifnull(simp.bitPromotor,0) <> 1");
+                        LEFT JOIN
+                    tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
+                WHERE 
+                    ifnull(simp.bitPromotor,0) <> 1
+                GROUP BY idSimpatizante
+                ");
         }
 
         return response()->json($promotores, 200);
@@ -171,6 +210,20 @@ class SimpatizantesController extends Controller
                 ]
             );
 
+            $idSimpatizante = DB::getPdo()->lastInsertId();
+            $index = 0;
+
+            foreach ($request->arrayDocumentos as $doc) {
+                $index++;
+                if($doc != '') {
+                    DB::insert(
+                        "INSERT INTO tblsimpatizantedocumento
+                            (`idSimpatizante`, `nombre`, `url`, `fechaSubida`) VALUES 
+                            (?, ?, ?, now());", [$idSimpatizante, "Documento $index", $doc]
+                    );
+                }
+            }
+
             return response("Simpatizante creado correctamente", 200);
         }
     }
@@ -209,9 +262,95 @@ class SimpatizantesController extends Controller
     }
 
     public function subirDocumento(Request $request) {
-        $filename = "documento_".time();
+        if($request->file()) {
+            $pathFile1 = '';
+            $pathFile2 = '';
 
-        return response()->json($request, 200);
+            if($request->file('file1'))
+                $pathFile1 = $request->file('file1')->store('simpatizantes', 'public');
+
+            if($request->file('file2'))
+                $pathFile2 = $request->file('file2')->store('simpatizantes', 'public');
+
+            return response()->json(array($pathFile1, $pathFile2), 200);
+        }
+        return response('No se pudo guardar el documento', 500);
         //Storage::disk('local')->put('example.txt', 'Contents');
+    }
+
+    public function descargarReporte(Request $request) {
+        $strFiltros = '';
+        $arrayValoresFiltros = array();
+        if($request->idSimpatizante != '') {
+            $strFiltros .= ' AND simp.idSimpatizante = ?';
+            array_push($arrayValoresFiltros, $request->idSimpatizante);
+        }
+
+        if($request->nombre != '') {
+            $strFiltros .= " AND concat(simp.nombre, ' ', simp.apellidoPaterno, ' ', simp.apellidoMaterno) regexp ?";
+            array_push($arrayValoresFiltros, str_replace(' ', '|', $request->nombre));
+        }
+
+        if($request->idPromotor != '') {
+            $strFiltros .= ' AND simp.idPromotor = ?';
+            array_push($arrayValoresFiltros, $request->idPromotor);
+        }
+
+        if($request->idSeccion != '') {
+            $strFiltros .= ' AND simp.idSeccion = ?';
+            array_push($arrayValoresFiltros, $request->idSeccion);
+        }
+
+        if($request->idLocalidad != '') {
+            $strFiltros .= ' AND simp.idLocalidad = ?';
+            array_push($arrayValoresFiltros, $request->idLocalidad);
+        }
+
+        $data = DB::select(
+            "SELECT 
+                simp.idSimpatizante,
+                simp.idPromotor,
+                simp.idLocalidad,
+                simp.idSeccion,
+                simp.idUsuario,
+                ifnull(simp.nombre, '') nombre,
+                ifnull(simp.apellidoMaterno, '') apellidoMaterno,
+                ifnull(simp.apellidoPaterno, '') apellidoPaterno,
+                ifnull(simp.domicilio, '') domicilio,
+                ifnull(simp.numExt, '') numExt,
+                ifnull(simp.numInt, '') numInt,
+                ifnull(simp.colonia, '') colonia,
+                ifnull(simp.codigoPostal, '') codigoPostal,
+                ifnull(simp.claveElector, '') claveElector,
+                ifnull(simp.numeroElector, '') numeroElector,
+                ifnull(simp.curp, '') curp,
+                ifnull(simp.telefono, '') telefono,
+                ifnull(simp.fechaHoraAlta, '') fechaHoraAlta,
+                ifnull(sec.claveSeccion, '') claveSeccion,
+                ifnull(claveLocalidad, '') claveLocalidad,
+                ifnull(loc.localidad, '') localidad,
+                CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor,
+                ifnull(GROUP_CONCAT(docs.url SEPARATOR '|sep|'), '') as docsURL,
+                ifnull(GROUP_CONCAT(docs.nombre SEPARATOR '|sep|'), '') as docsNames
+            FROM
+                tblsimpatizante AS simp
+                    LEFT JOIN
+                tblseccion AS sec USING (idSeccion)
+                    LEFT JOIN
+                tbllocalidad AS loc USING (idLocalidad)
+                    LEFT JOIN
+                tblsimpatizante as prom on prom.idSimpatizante = simp.idPromotor
+                    LEFT JOIN
+                tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
+            WHERE ifnull(simp.bitPromotor,0) <> 1
+            $strFiltros
+            GROUP BY idSimpatizante", $arrayValoresFiltros);
+
+        // share data to view
+        // view()->share('reportes.tablaSimpatizantes',$data);
+        $pdf = PDF::loadView('reportes.tablaSimpatizantes', ['data' => $data]);
+
+        // download PDF file with download method
+        return $pdf->stream('pdf_file.pdf');
     }
 }

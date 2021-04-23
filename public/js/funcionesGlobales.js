@@ -6,7 +6,7 @@ function abrirLoading(mensaje = 'Cargando..') {
     divSpinner.setAttribute('role', 'status');
 
     let divMensaje = document.createElement('div');
-    divMensaje.innerHTML = 'Cargando...';
+    divMensaje.innerHTML = mensaje;
     divMensaje.classList.add("text-center");
     divMensaje.classList.add("mt-4");
 
@@ -20,6 +20,31 @@ function abrirLoading(mensaje = 'Cargando..') {
         closeOnEsc: false,
         buttons: false,
         className: 'swal-width-sm'
+    });
+}
+
+function enableInputLoading(element) {
+    let divSpinner = document.createElement('div');
+    divSpinner.innerHTML = '<span class="text-center"></span>';
+    divSpinner.classList.add('spinner-border');
+    divSpinner.classList.add('text-primary');
+    divSpinner.setAttribute('role', 'status');
+    divSpinner.style.position = 'absolute';
+    divSpinner.style.top = '0';
+    divSpinner.style.bottom = '0';
+    divSpinner.style.right = '10px';
+    divSpinner.style.margin = 'auto';
+    divSpinner.style.width = '20px';
+    divSpinner.style.height = '20px';
+    divSpinner.style.zIndex = '3';
+    element.appendChild(divSpinner)
+}
+
+function disableInputLoading(element) {
+    element.childNodes.forEach((child) => { 
+        if(child.classList && child.classList.contains('spinner-border')) { 
+            element.removeChild(child);
+        } 
     });
 }
 

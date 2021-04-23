@@ -43,6 +43,9 @@ Route::middleware(['isLogin'])->group(function () {
         Route::put('/secciones', [SeccionesController::class, 'guardar']);
         Route::delete('/secciones', [SeccionesController::class, 'eliminar']);
 
+        Route::get('/simpatizantes/reporte/pdf', [SimpatizantesController::class, 'descargarReporte']);
+        Route::get('/simpatizantes/reporte/xml', [SimpatizantesController::class, 'descargarReporte']);
+
     });
 
     //LIVE SEARCH
@@ -55,13 +58,15 @@ Route::middleware(['isLogin'])->group(function () {
     Route::post('/simpatizantes', [SimpatizantesController::class, 'listar']);
     Route::put('/simpatizantes', [SimpatizantesController::class, 'guardar']);
     Route::delete('/simpatizantes', [SimpatizantesController::class, 'eliminar']);
-    Route::put('/simpatizantes/documentos', [SimpatizantesController::class, 'subirDocumento']);
+    Route::post('/simpatizantes/documentos', [SimpatizantesController::class, 'subirDocumento']);
 
     //PROMOTORES
     Route::get('/promotores', [PromotoresController::class, 'index'])->name('promotores');
     Route::post('/promotores', [PromotoresController::class, 'listar']);
     Route::put('/promotores', [PromotoresController::class, 'guardar']);
     Route::delete('/promotores', [PromotoresController::class, 'eliminar']);
+
+    
 
 });
 

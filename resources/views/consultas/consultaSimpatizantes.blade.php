@@ -79,9 +79,68 @@
         </div>
     </div>
 
+
+    <div class="row mt-5">
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtNombre" class="form-label">Simpatizante</label>
+            <input type="text" class="form-control" id="txtNombre" placeholder="Ingrese nombres y/o apellidos (busqueda libre)" value="" required="" autocomplete="off" onkeypress="">
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtPromotor" class="form-label">Promotor</label>
+            <div class="input-group input-loading" id="input-loading-promotor">
+                <input type="text" class="form-control" id="txtPromotor" placeholder="Ingrese nombre promotor" value="" required="" autocomplete="off" onkeypress="">
+                <input type="hidden" id="hdnPromotor">
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtLocalidad" class="form-label">Localidad</label>
+            <div class="input-group input-loading" id="input-loading-localidad">
+                <input type="text" class="form-control" id="txtLocalidad" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
+                <input type="hidden" id="hdnLocalidad">
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtSeccion" class="form-label">Sección</label>
+            <div class="input-group input-loading" id="input-loading-seccion">
+                <input type="text" class="form-control" id="txtSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+                <input type="hidden" id="hdnSeccion">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <a href="#" class="btn btn-primary btn-icon-split float-right" onclick="listarSimpatizantes()">
+                <span class="icon text-white-50">
+                    <i class="fas fa-search"></i>
+                </span>
+                <span class="text" style="min-width: 150px">Buscar</span>
+            </a>
+        </div>
+
+        <div class="col-12">
+            
+        </div>
+    </div>
+
     <div class="row mt-4">
         <div class="col-sm-12">
-            <h5>Simpatizantes registrados</h5>
+            <h5 style="display: inline-block">Simpatizantes registrados</h5>
+
+            <a href="#" class="btn btn-danger btn-icon-split float-right mb-2 ml-2" onclick="descargarReporte('pdf')">
+                <span class="icon text-white-50">
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                </span>
+                <span class="text" style="min-width: 150px">Generar PDF</span>
+            </a>
+            
+            <a href="#" class="btn btn-success btn-icon-split float-right mb-2 ml-2">
+                <span class="icon text-white-50">
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                </span>
+                <span class="text" style="min-width: 150px">Generar XLS</span>
+            </a>
         </div>
         <div class="col">
             <table class="table table-striped table-sm table-bordered">
@@ -109,7 +168,113 @@
     <script>
         $(document).ready(() => {
             listarSimpatizantes();
+
+            $("#txtPromotor").autocomplete({
+                source: function( request, response ) {
+                    $("#hdnPromotor").val("");
+                    enableInputLoading(document.getElementById('input-loading-promotor'));
+                    $.ajax({
+                        url: "{{ asset('/promotores/autocomplete') }}",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: {
+                            txtBusqueda: request.term
+                        },
+                        success: function( data ) {
+                            disableInputLoading(document.getElementById('input-loading-promotor'));
+                            response( data );
+                        },
+                        error: () => {
+                            disableInputLoading(document.getElementById('input-loading-promotor'));
+                        }
+                    });
+                },
+                _renderItem: function( ul, item ) {
+                    return $( "<li>" )
+                        .attr( "data-value", item.label )
+                        .append( item.label )
+                        .appendTo( ul );
+                },
+                select: function( event, ui ) {
+                    console.log(ui.item.label)
+                    $("#txtPromotor").val(ui.item.label);
+                    $("#hdnPromotor").val(ui.item.value);
+                    return false;
+                },
+            });
+
+            $("#txtLocalidad").autocomplete({
+                source: function( request, response ) {
+                    $("#hdnLocalidad").val("");
+                    enableInputLoading(document.getElementById('input-loading-localidad'));
+                    $.ajax({
+                        url: "{{ asset('/localidades/autocomplete') }}",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: {
+                            txtBusqueda: request.term
+                        },
+                        success: function( data ) {
+                            disableInputLoading(document.getElementById('input-loading-localidad'));
+                            response( data );
+                        },
+                        error: () => {
+                            disableInputLoading(document.getElementById('input-loading-localidad'));
+                        }
+                    });
+                },
+                _renderItem: function( ul, item ) {
+                    return $( "<li>" )
+                        .attr( "data-value", item.label )
+                        .append( item.label )
+                        .appendTo( ul );
+                },
+                select: function( event, ui ) {
+                    console.log(ui.item.label)
+                    $("#txtLocalidad").val(ui.item.label);
+                    $("#hdnLocalidad").val(ui.item.value);
+                    return false;
+                },
+            });
+
+            $("#txtSeccion").autocomplete({
+                source: function( request, response ) {
+                    $("#hdnSeccion").val("");
+                    enableInputLoading(document.getElementById('input-loading-seccion'));
+                    $.ajax({
+                        url: "{{ asset('/secciones/autocomplete') }}",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: {
+                            txtBusqueda: request.term
+                        },
+                        success: function( data ) {
+                            disableInputLoading(document.getElementById('input-loading-seccion'));
+                            response( data );
+                        },
+                        error: () => {
+                            disableInputLoading(document.getElementById('input-loading-seccion'));
+                        }
+                    });
+                },
+                _renderItem: function( ul, item ) {
+                    return $( "<li>" )
+                        .attr( "data-value", item.value )
+                        .append( item.label )
+                        .appendTo( ul );
+                },
+                select: function( event, ui ) {
+                    console.log("select >>> ", ui);
+                    $("#txtSeccion").val(ui.item.label);
+                    $("#hdnSeccion").val(ui.item.value);
+                    return false;
+                },
+            });
         });
+
 
         function listarSimpatizantes() {
             $.ajax({
@@ -118,28 +283,44 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                data: {},
+                data: {
+                    nombre: document.getElementById('txtNombre').value.trim(),
+                    idPromotor: document.getElementById('hdnPromotor').value.trim(),
+                    idSeccion: document.getElementById('hdnSeccion').value.trim(),
+                    idLocalidad: document.getElementById('hdnLocalidad').value.trim(),
+                },
                 beforeSend: () => {
                     console.log("enviando");
+                    abrirLoading('Consultando simpatizantes');
                 },
                 success: (arraySimpatizantes) => {
-
                     let tableBody = document.getElementById("table-body-simpatizantes");
                     if(arraySimpatizantes.length > 0) {
                         let html = '';
                         arraySimpatizantes.forEach(simpatizante => {
+
+                            let documentosURL = simpatizante.docsURL.split('|sep|');
+                            let documentosName = simpatizante.docsNames.split('|sep|');
+                            let botonesDocumentos = '';
+                            documentosURL.forEach((url, index) => {
+                                if(url != '') {
+                                    botonesDocumentos += `<a href="/storage/${documentosURL[index]}" target="_blank" class="btn btn-primary btn-circle btn-sm  mr-2" data-toggle="tooltip" data-placement="bottom" title="${documentosName[index]}">
+                                            <i class="fa fa-file" aria-hidden="true"></i>
+                                        </a>`;
+                                }
+                            });
+
                             html += `<tr>
                                 <td>${simpatizante.nombre} ${simpatizante.apellidoPaterno} ${simpatizante.apellidoMaterno}</td>
-                                <td>${simpatizante.curp}</td>
-                                <td>${simpatizante.claveElector}</td>
-                                <td>${simpatizante.numeroElector}</td>
-                                <td>${simpatizante.claveSeccion}</td>
-                                <td>${simpatizante.localidad}</td>
-                                <td>${armarDomicilio(simpatizante)} </td>
-                                <td>${simpatizante.telefono}</td>
-                                <td>${simpatizante.promotor}</td>
-                                <td style="text-align: center">
-                                </td>
+                                <td>${simpatizante.curp || ''}</td>
+                                <td>${simpatizante.claveElector || ''}</td>
+                                <td>${simpatizante.numeroElector || ''}</td>
+                                <td>${simpatizante.claveSeccion || ''}</td>
+                                <td>${simpatizante.localidad || ''}</td>
+                                <td>${armarDomicilio(simpatizante) || ''} </td>
+                                <td>${simpatizante.telefono || ''}</td>
+                                <td>${simpatizante.promotor || ''}</td>
+                                <td style="text-align: center">${botonesDocumentos}</td>
                             </tr>`;
                         });
                         tableBody.innerHTML = html;
@@ -147,12 +328,27 @@
                     } else {
                         tableBody.innerHTML = `<tr><td colspan="10">No se encontraron simpatizantes</td></tr>`;
                     }
+                    swal.close();
                 },
                 error: (error, status) => {
                     console.log("error", error);
                     swal("", error.responseText, "error");
                 }
             });
+        }
+
+        function descargarReporte(tipoReporte = 'pdf') {
+            let parametros = new URLSearchParams({
+                    nombre: document.getElementById('txtNombre').value.trim(),
+                    idPromotor: document.getElementById('hdnPromotor').value.trim(),
+                    idSeccion: document.getElementById('hdnSeccion').value.trim(),
+                    idLocalidad: document.getElementById('hdnLocalidad').value.trim(),
+                });
+            window.open(
+                "{{ asset('/simpatizantes/reporte') }}/"+tipoReporte+'?'+parametros,
+                "DescriptiveWindowName",
+                "resizable,scrollbars,status"
+            );
         }
 
         function armarDomicilio(promotor) {
