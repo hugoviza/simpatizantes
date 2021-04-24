@@ -34,10 +34,7 @@
     <script src="{{ asset('plantilla_admin/js/sweetalert.min.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('css/jquery-ui.css') }}">
-    {{-- <link rel="stylesheet" href="/resources/demos/style.css"> --}}
-    {{-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> --}}
     <script src="{{ asset('js/funcionesGlobales.js') }}"></script>
-
     <script src="{{ asset('js/jquery-ui.js') }}"></script>
 
     <style>

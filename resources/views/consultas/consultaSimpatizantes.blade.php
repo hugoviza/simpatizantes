@@ -81,9 +81,9 @@
 
 
     <div class="row mt-5">
-        <div class="col-xl-3 col-md-6 mb-2">
+        <div class="col-xl-6 col-md-6 mb-2">
             <label for="txtNombre" class="form-label">Simpatizante</label>
-            <input type="text" class="form-control" id="txtNombre" placeholder="Ingrese nombres y/o apellidos (busqueda libre)" value="" required="" autocomplete="off" onkeypress="">
+            <input type="text" class="form-control" id="txtNombre" placeholder="Ingrese nombres, apellidos, curp, clave ine, número ine (busqueda libre)" value="" required="" autocomplete="off" onkeypress="">
         </div>
 
         <div class="col-xl-3 col-md-6 mb-2">
@@ -100,6 +100,19 @@
                 <input type="text" class="form-control" id="txtLocalidad" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
                 <input type="hidden" id="hdnLocalidad">
             </div>
+        </div>
+
+        <div class="col-xl-6 col-md-6 mb-2">
+            <label for="txtSeccion" class="form-label">Fecha registro</label>
+            
+            <div class="input-group">
+                <input type="text" class="form-control" id="txtFechaInicio" placeholder="Fecha inicio (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id=""> y </span>
+                </div>
+                <input type="text" class="form-control" id="txtFechaFin" placeholder="Fecha final (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)">
+            </div>
+
         </div>
 
         <div class="col-xl-3 col-md-6 mb-2">
@@ -147,6 +160,7 @@
                 <thead>
                     <tr>
                         <th>Nombre completo</th>
+                        <th>Fecha registro</th>
                         <th>Curp</th>
                         <th>Clave INE</th>
                         <th>Número INE</th>
@@ -168,6 +182,19 @@
     <script>
         $(document).ready(() => {
             listarSimpatizantes();
+
+            $( "#txtFechaInicio" ).datepicker({
+                minDate: new Date(2021, 03, 1),
+                prevText: "Anterior",
+                nextText: "Siguiente",
+                dateFormat: "dd/mm/yy",
+            });
+            $( "#txtFechaFin" ).datepicker({
+                minDate: new Date(2021, 03, 1),
+                prevText: "Anterior",
+                nextText: "Siguiente",
+                dateFormat: "dd/mm/yy",
+            });
 
             $("#txtPromotor").autocomplete({
                 source: function( request, response ) {
@@ -288,6 +315,8 @@
                     idPromotor: document.getElementById('hdnPromotor').value.trim(),
                     idSeccion: document.getElementById('hdnSeccion').value.trim(),
                     idLocalidad: document.getElementById('hdnLocalidad').value.trim(),
+                    fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
+                    fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
                 },
                 beforeSend: () => {
                     console.log("enviando");
@@ -312,6 +341,7 @@
 
                             html += `<tr>
                                 <td>${simpatizante.nombre} ${simpatizante.apellidoPaterno} ${simpatizante.apellidoMaterno}</td>
+                                <td>${simpatizante.fechaHoraAlta || ''}</td>
                                 <td>${simpatizante.curp || ''}</td>
                                 <td>${simpatizante.claveElector || ''}</td>
                                 <td>${simpatizante.numeroElector || ''}</td>
@@ -337,12 +367,28 @@
             });
         }
 
+        function toDateSQL(string = '') {
+            if(string.trim().length == 0) {
+                return '';
+            }
+
+            let arrayString = string.split('/');
+
+            if(arrayString.length == 0) {
+                return '';
+            }
+
+            return (`${arrayString[2]}-${arrayString[1]}-${arrayString[0]}`);
+        }
+
         function descargarReporte(tipoReporte = 'pdf') {
             let parametros = new URLSearchParams({
                     nombre: document.getElementById('txtNombre').value.trim(),
                     idPromotor: document.getElementById('hdnPromotor').value.trim(),
                     idSeccion: document.getElementById('hdnSeccion').value.trim(),
                     idLocalidad: document.getElementById('hdnLocalidad').value.trim(),
+                    fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
+                    fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
                 });
             window.open(
                 "{{ asset('/simpatizantes/reporte') }}/"+tipoReporte+'?'+parametros,
@@ -371,5 +417,38 @@
 
                 return domicilio;
         }
+
+        function validarFechaSeleccionada(input = null) {
+            if(!input) {
+                return;
+            }
+
+            if(input.value.trim() == '') {
+                input.value = '';
+                return;
+            }
+
+            let arrayFecha = input.value.trim().split('/');
+
+            if( arrayFecha.length < 3 ) {
+                swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
+                input.value = '';
+                return;
+            }
+
+            if(Number(arrayFecha[0]) <= 0 || Number(arrayFecha[1]) <= 0 || Number(arrayFecha[2]) <= 0) {
+                swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
+                input.value = '';
+                return;
+            }
+
+            let date = Date.parse(`${arrayFecha[2]}-${arrayFecha[1]}-${arrayFecha[0]}`);
+
+            if(isNaN(date)) {
+                swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
+                input.value = '';
+                return;
+            }
+        } 
     </script>
 @endsection

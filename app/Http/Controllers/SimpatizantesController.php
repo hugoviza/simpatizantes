@@ -23,7 +23,7 @@ class SimpatizantesController extends Controller
         }
 
         if($request->nombre != '') {
-            $strFiltros .= " AND concat(simp.nombre, ' ', simp.apellidoPaterno, ' ', simp.apellidoMaterno) regexp ?";
+            $strFiltros .= " AND concat(ifnull(simp.nombre,''), ' ', ifnull(simp.apellidoPaterno,''), ' ', ifnull(simp.apellidoMaterno,''), ' ', ifnull(simp.curp,''), ' ', ifnull(simp.claveElector,''), ' ', ifnull(simp.numeroElector,'')) regexp ?";
             array_push($arrayValoresFiltros, str_replace(' ', '|', $request->nombre));
         }
 
@@ -40,6 +40,16 @@ class SimpatizantesController extends Controller
         if($request->idLocalidad != '') {
             $strFiltros .= ' AND simp.idLocalidad = ?';
             array_push($arrayValoresFiltros, $request->idLocalidad);
+        }
+
+        if($request->fechaInicio != '') {
+            $strFiltros .= ' AND simp.fechaHoraAlta >= ?';
+            array_push($arrayValoresFiltros, "$request->fechaInicio 00:00:00");
+        }
+
+        if($request->fechaFin != '') {
+            $strFiltros .= ' AND simp.fechaHoraAlta <= ?';
+            array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
         }
 
         if($strFiltros != '') {
@@ -62,7 +72,7 @@ class SimpatizantesController extends Controller
                     ifnull(simp.numeroElector, '') numeroElector,
                     ifnull(simp.curp, '') curp,
                     ifnull(simp.telefono, '') telefono,
-                    ifnull(simp.fechaHoraAlta, '') fechaHoraAlta,
+                    ifnull(date_format(simp.fechaHoraAlta, '%d/%b/%Y %T'), '') fechaHoraAlta,
                     ifnull(sec.claveSeccion, '') claveSeccion,
                     ifnull(claveLocalidad, '') claveLocalidad,
                     ifnull(loc.localidad, '') localidad,
@@ -81,7 +91,8 @@ class SimpatizantesController extends Controller
                     tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
                 WHERE ifnull(simp.bitPromotor,0) <> 1
                 $strFiltros
-                GROUP BY idSimpatizante", $arrayValoresFiltros);
+                GROUP BY idSimpatizante
+                order by simp.fechaHoraAlta", $arrayValoresFiltros);
         } else {
             // $limit = 
             $promotores = DB::select(
@@ -103,7 +114,7 @@ class SimpatizantesController extends Controller
                     ifnull(simp.numeroElector, '') numeroElector,
                     ifnull(simp.curp, '') curp,
                     ifnull(simp.telefono, '') telefono,
-                    ifnull(simp.fechaHoraAlta, '') fechaHoraAlta,
+                    ifnull(date_format(simp.fechaHoraAlta, '%d/%b/%Y %T'), '') fechaHoraAlta,
                     ifnull(sec.claveSeccion, '') claveSeccion,
                     ifnull(claveLocalidad, '') claveLocalidad,
                     ifnull(loc.localidad, '') localidad,
@@ -123,6 +134,7 @@ class SimpatizantesController extends Controller
                 WHERE 
                     ifnull(simp.bitPromotor,0) <> 1
                 GROUP BY idSimpatizante
+                order by simp.fechaHoraAlta
                 ");
         }
 
@@ -176,6 +188,35 @@ class SimpatizantesController extends Controller
         }
 
         if($request->idSimpatizante) {
+            // validamos que no este registrada la curp, clave ine, numero ine
+            $curpDuplicada = array();
+            $claveElectorDuplicada = array();
+            $numeroElectorDuplicada = array();
+
+            if($request->curp != '') {
+                $curpDuplicada = DB::select("SELECT * FROM tblsimpatizante WHERE curp = ? AND idSimpatizante <> ? ", [$request->curp, $request->idSimpatizante]);
+            }
+
+            if($request->claveElector != '') {
+                $claveElectorDuplicada = DB::select("SELECT * FROM tblsimpatizante WHERE claveElector = ? AND idSimpatizante <> ? ", [$request->claveElector, $request->idSimpatizante]);
+            }
+
+            if($request->numeroElector != '') {
+                $numeroElectorDuplicada = DB::select("SELECT * FROM tblsimpatizante WHERE numeroElector = ? AND idSimpatizante <> ? ", [$request->numeroElector, $request->idSimpatizante]);
+            }
+
+            if(sizeof($curpDuplicada) > 0) {
+                return response("La clave curp ya está siendo utilizada para otro simpatizante", 400);
+            }
+
+            if(sizeof($claveElectorDuplicada) > 0) {
+                return response("La clave elector ya está siendo utilizada para otro simpatizante", 400);
+            }
+
+            if(sizeof($numeroElectorDuplicada) > 0) {
+                return response("El número de elector está siendo utilizado por otro simpatizante", 400);
+            }
+
             DB::update('UPDATE tblsimpatizante set 
                 idLocalidad = ?, idSeccion = ?, 
                 nombre = ?, apellidoMaterno = ?, apellidoPaterno = ?, 
@@ -193,6 +234,37 @@ class SimpatizantesController extends Controller
 
             return response("Simpatizante editado correctamente", 200);
         } else {
+
+            // validamos que no este registrada la curp, clave ine, numero ine
+            $curpDuplicada = array();
+            $claveElectorDuplicada = array();
+            $numeroElectorDuplicada = array();
+
+            if($request->curp != '') {
+                $curpDuplicada = DB::select("SELECT * FROM tblsimpatizante WHERE curp = ? ", [$request->curp]);
+            }
+
+            if($request->claveElector != '') {
+                $claveElectorDuplicada = DB::select("SELECT * FROM tblsimpatizante WHERE claveElector = ? ", [$request->claveElector]);
+            }
+
+            if($request->numeroElector != '') {
+                $numeroElectorDuplicada = DB::select("SELECT * FROM tblsimpatizante WHERE numeroElector = ? ", [$request->numeroElector]);
+            }
+
+            if(sizeof($curpDuplicada) > 0) {
+                return response("La clave curp ya está siendo utilizada para otro simpatizante", 400);
+            }
+
+            if(sizeof($claveElectorDuplicada) > 0) {
+                return response("La clave elector ya está siendo utilizada para otro simpatizante", 400);
+            }
+
+            if(sizeof($numeroElectorDuplicada) > 0) {
+                return response("El número de elector está siendo utilizado por otro simpatizante", 400);
+            }
+            
+
             DB::insert(
                 "INSERT INTO tblsimpatizante
                     (`idUsuario`, `idLocalidad`, `idSeccion`, 
@@ -287,7 +359,7 @@ class SimpatizantesController extends Controller
         }
 
         if($request->nombre != '') {
-            $strFiltros .= " AND concat(simp.nombre, ' ', simp.apellidoPaterno, ' ', simp.apellidoMaterno) regexp ?";
+            $strFiltros .= " AND concat(ifnull(simp.nombre,''), ' ', ifnull(simp.apellidoPaterno,''), ' ', ifnull(simp.apellidoMaterno,''), ' ', ifnull(simp.curp,''), ' ', ifnull(simp.claveElector,''), ' ', ifnull(simp.numeroElector,'')) regexp ?";
             array_push($arrayValoresFiltros, str_replace(' ', '|', $request->nombre));
         }
 
@@ -304,6 +376,26 @@ class SimpatizantesController extends Controller
         if($request->idLocalidad != '') {
             $strFiltros .= ' AND simp.idLocalidad = ?';
             array_push($arrayValoresFiltros, $request->idLocalidad);
+        }
+
+        if($request->fechaInicio != '') {
+            $strFiltros .= ' AND simp.fechaHoraAlta >= ?';
+            array_push($arrayValoresFiltros, "$request->fechaInicio 00:00:00");
+        }
+
+        if($request->fechaFin != '') {
+            $strFiltros .= ' AND simp.fechaHoraAlta <= ?';
+            array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
+        }
+
+        if($request->fechaInicio != '') {
+            $strFiltros .= ' AND simp.fechaHoraAlta >= ?';
+            array_push($arrayValoresFiltros, "$request->fechaInicio 00:00:00");
+        }
+
+        if($request->fechaFin != '') {
+            $strFiltros .= ' AND simp.fechaHoraAlta <= ?';
+            array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
         }
 
         $data = DB::select(
@@ -325,7 +417,7 @@ class SimpatizantesController extends Controller
                 ifnull(simp.numeroElector, '') numeroElector,
                 ifnull(simp.curp, '') curp,
                 ifnull(simp.telefono, '') telefono,
-                ifnull(simp.fechaHoraAlta, '') fechaHoraAlta,
+                ifnull(date_format(simp.fechaHoraAlta, '%d/%b/%Y %T'), '') fechaHoraAlta,
                 ifnull(sec.claveSeccion, '') claveSeccion,
                 ifnull(claveLocalidad, '') claveLocalidad,
                 ifnull(loc.localidad, '') localidad,
@@ -346,9 +438,11 @@ class SimpatizantesController extends Controller
             $strFiltros
             GROUP BY idSimpatizante", $arrayValoresFiltros);
 
+        // return view('reportes.tablaSimpatizantes', ['data' => $data]);
+
         // share data to view
         // view()->share('reportes.tablaSimpatizantes',$data);
-        $pdf = PDF::loadView('reportes.tablaSimpatizantes', ['data' => $data]);
+        $pdf = PDF::loadView('reportes.tablaSimpatizantes', ['data' => $data])->setPaper('a4', 'landscape');
 
         // download PDF file with download method
         return $pdf->stream('pdf_file.pdf');
