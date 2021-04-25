@@ -169,12 +169,19 @@
                                 <img class="img-profile rounded-circle"
                                     src="{{ asset('plantilla_admin/img/undraw_profile.svg') }}">
                             </a>
+                            
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="{{ asset('login') }}">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
+                                </a>
+                                <a class="dropdown-item" href="{{ asset('login') }}">
+                                    @if ($session->get('nivelAcceso') === 'admin')
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Mi ip: @php echo  gethostbyname(trim(`hostname`)); @endphp
+                                    @endif
                                 </a>
                             </div>
                         </li>

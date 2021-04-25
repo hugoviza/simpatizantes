@@ -73,7 +73,7 @@ class PromotoresController extends Controller
                     ifnull(numeroElector, '') numeroElector,
                     ifnull(curp, '') curp,
                     ifnull(telefono, '') telefono,
-                    ifnull(fechaHoraAlta, '') fechaHoraAlta,
+                    ifnull(date_format(fechaHoraAlta, '%d/%b/%Y %T'), '') fechaHoraAlta,
                     ifnull(sec.claveSeccion, '') claveSeccion,
                     ifnull(claveLocalidad, '') claveLocalidad,
                     ifnull(loc.localidad, '') localidad

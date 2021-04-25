@@ -106,7 +106,7 @@
             <label for="txtSeccion" class="form-label">Fecha registro</label>
             
             <div class="input-group">
-                <input type="text" class="form-control" id="txtFechaInicio" placeholder="Fecha inicio (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)">
+                <input type="text" class="form-control" id="txtFechaInicio" placeholder="Fecha inicio (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)" value="@php echo date('d/m/Y') @endphp">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id=""> y </span>
                 </div>
@@ -333,7 +333,7 @@
                             let botonesDocumentos = '';
                             documentosURL.forEach((url, index) => {
                                 if(url != '') {
-                                    botonesDocumentos += `<a href="/storage/${documentosURL[index]}" target="_blank" class="btn btn-primary btn-circle btn-sm  mr-2" data-toggle="tooltip" data-placement="bottom" title="${documentosName[index]}">
+                                    botonesDocumentos += `<a href="{{ asset('/') }}/storage/${documentosURL[index]}" target="_blank" class="btn btn-primary btn-circle btn-sm  mr-2" data-toggle="tooltip" data-placement="bottom" title="${documentosName[index]}">
                                             <i class="fa fa-file" aria-hidden="true"></i>
                                         </a>`;
                                 }

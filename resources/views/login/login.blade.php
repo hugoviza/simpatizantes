@@ -95,7 +95,7 @@
                 },
                 success: (response) => {
                     console.log("response", response)
-                    window.location.href = "/";
+                    window.location.href = "{{ asset('/') }}";
                 },
                 error: (error, status) => {
                     console.log("error", error)
