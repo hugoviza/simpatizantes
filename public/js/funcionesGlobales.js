@@ -69,3 +69,50 @@ function isNumber(evt) {
 function addSlashes(text) {
     return (text+'').replace(/([\\"'])/g, "\\$1").replace(/\0/g, "\\0");
 }
+
+function toDateSQL(string = '') {
+    if(string.trim().length == 0) {
+        return '';
+    }
+
+    let arrayString = string.split('/');
+
+    if(arrayString.length == 0) {
+        return '';
+    }
+
+    return (`${arrayString[2]}-${arrayString[1]}-${arrayString[0]}`);
+}
+
+function validarFechaSeleccionada(input = null) {
+    if(!input) {
+        return;
+    }
+
+    if(input.value.trim() == '') {
+        input.value = '';
+        return;
+    }
+
+    let arrayFecha = input.value.trim().split('/');
+
+    if( arrayFecha.length < 3 ) {
+        swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
+        input.value = '';
+        return;
+    }
+
+    if(Number(arrayFecha[0]) <= 0 || Number(arrayFecha[1]) <= 0 || Number(arrayFecha[2]) <= 0) {
+        swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
+        input.value = '';
+        return;
+    }
+
+    let date = Date.parse(`${arrayFecha[2]}-${arrayFecha[1]}-${arrayFecha[0]}`);
+
+    if(isNaN(date)) {
+        swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
+        input.value = '';
+        return;
+    }
+}

@@ -148,11 +148,11 @@
                 <span class="text" style="min-width: 150px">Generar PDF</span>
             </a>
             
-            <a href="#" class="btn btn-success btn-icon-split float-right mb-2 ml-2">
+            <a href="#" class="btn btn-success btn-icon-split float-right mb-2 ml-2" onclick="descargarReporte('xlsx')">
                 <span class="icon text-white-50">
                     <i class="fa fa-download" aria-hidden="true"></i>
                 </span>
-                <span class="text" style="min-width: 150px">Generar XLS</span>
+                <span class="text" style="min-width: 150px">Generar XLSX</span>
             </a>
         </div>
         <div class="col">
@@ -367,20 +367,6 @@
             });
         }
 
-        function toDateSQL(string = '') {
-            if(string.trim().length == 0) {
-                return '';
-            }
-
-            let arrayString = string.split('/');
-
-            if(arrayString.length == 0) {
-                return '';
-            }
-
-            return (`${arrayString[2]}-${arrayString[1]}-${arrayString[0]}`);
-        }
-
         function descargarReporte(tipoReporte = 'pdf') {
             let parametros = new URLSearchParams({
                     nombre: document.getElementById('txtNombre').value.trim(),
@@ -390,11 +376,18 @@
                     fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
                     fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
                 });
-            window.open(
-                "{{ asset('/simpatizantes/reporte') }}/"+tipoReporte+'?'+parametros,
-                "DescriptiveWindowName",
-                "resizable,scrollbars,status"
-            );
+            if(tipoReporte == 'xlsx') {
+                var link = document.createElement('a');
+                link.href =  "{{ asset('/simpatizantes/reporte') }}/"+tipoReporte+'?'+parametros;
+                link.download = 'simpatizantes.xlsx';
+                link.dispatchEvent(new MouseEvent('click'));
+            } else {
+                window.open(
+                    "{{ asset('/simpatizantes/reporte') }}/"+tipoReporte+'?'+parametros,
+                    "DescriptiveWindowName",
+                    "resizable,scrollbars,status"
+                );
+            }
         }
 
         function armarDomicilio(promotor) {
@@ -416,39 +409,6 @@
                 domicilio += (", " + promotor.codigoPostal);
 
                 return domicilio;
-        }
-
-        function validarFechaSeleccionada(input = null) {
-            if(!input) {
-                return;
-            }
-
-            if(input.value.trim() == '') {
-                input.value = '';
-                return;
-            }
-
-            let arrayFecha = input.value.trim().split('/');
-
-            if( arrayFecha.length < 3 ) {
-                swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
-                input.value = '';
-                return;
-            }
-
-            if(Number(arrayFecha[0]) <= 0 || Number(arrayFecha[1]) <= 0 || Number(arrayFecha[2]) <= 0) {
-                swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
-                input.value = '';
-                return;
-            }
-
-            let date = Date.parse(`${arrayFecha[2]}-${arrayFecha[1]}-${arrayFecha[0]}`);
-
-            if(isNaN(date)) {
-                swal(`La fecha ingresada (${input.value.trim()}) no es una fecha válida`);
-                input.value = '';
-                return;
-            }
         } 
     </script>
 @endsection

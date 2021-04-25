@@ -198,14 +198,70 @@
         </div>
     </div>
 
-    <!-- TABLA PROMOTORES -->
+    <!-- SIMPATIZANTES -->
     <div class="row mt-4">
         <div class="col-12">
             <h5>simpatizantes registrados</h5>
         </div>
     </div>
 
-    <div style="height: 19px"></div>
+    <!-- FILTROS -->
+    <div class="row mt-5 mb-4">
+        <div class="col-xl-6 col-md-6 mb-2">
+            <label for="txtNombre_filtro" class="form-label">Simpatizante</label>
+            <input type="text" class="form-control" id="txtNombre_filtro" placeholder="Ingrese nombres, apellidos, curp, clave ine, número ine (busqueda libre)" value="" required="" autocomplete="off" onkeypress="">
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtPromotor_filtro" class="form-label">Promotor</label>
+            <div class="input-group input-loading" id="input-loading-promotor">
+                <input type="text" class="form-control" id="txtPromotor_filtro" placeholder="Ingrese nombre promotor" value="" required="" autocomplete="off" onkeypress="">
+                <input type="hidden" id="hdnPromotor_filtro">
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtLocalidad_filtro" class="form-label">Localidad</label>
+            <div class="input-group input-loading" id="input-loading-localidad">
+                <input type="text" class="form-control" id="txtLocalidad_filtro" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
+                <input type="hidden" id="hdnLocalidad_filtro">
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-6 mb-2">
+            <label for="txtSeccion" class="form-label">Fecha registro</label>
+            
+            <div class="input-group">
+                <input type="text" class="form-control" id="txtFechaInicio" placeholder="Fecha inicio (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)" value="@php echo date('d/m/Y') @endphp">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id=""> y </span>
+                </div>
+                <input type="text" class="form-control" id="txtFechaFin" placeholder="Fecha final (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)">
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtSeccion_filtro" class="form-label">Sección</label>
+            <div class="input-group input-loading" id="input-loading-seccion">
+                <input type="text" class="form-control" id="txtSeccion_filtro" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+                <input type="hidden" id="hdnSeccion_filtro">
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <button class="btn btn-primary btn-icon-split float-right" onclick="obtenerListaSimpatizantes()" style="margin-top: 24px">
+                <span class="icon text-white-50">
+                    <i class="fas fa-search"></i>
+                </span>
+                <span class="text" style="min-width: 150px">Buscar</span>
+            </button>
+        </div>
+
+        <div class="col-12">
+            
+        </div>
+    </div>
 
     <div class="row mt-2">
         <div class="col-12">
@@ -238,103 +294,226 @@
         $(document).ready(() => {
             obtenerListaSimpatizantes();
 
-            $(".custom-file-input").on("change", function() {
-                var fileName = $(this).val().split("\\").pop();
-                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-            });
+            // registros
+                $(".custom-file-input").on("change", function() {
+                    var fileName = $(this).val().split("\\").pop();
+                    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                });
 
-            $("#txtPromotor").autocomplete({
-                source: function( request, response ) {
-                    $("#hdnPromotor").val("");
-                    $.ajax({
-                        url: "{{ asset('/promotores/autocomplete') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            txtBusqueda: request.term
-                        },
-                        success: function( data ) {
-                            console.log("resultados", data);
-                            response( data );
-                        }
-                    });
-                },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.label )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
-                select: function( event, ui ) {
-                    console.log(ui.item.label)
-                    $("#txtPromotor").val(ui.item.label);
-                    $("#hdnPromotor").val(ui.item.value);
-                    return false;
-                },
-            });
+                $("#txtPromotor").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnPromotor").val("");
+                        $.ajax({
+                            url: "{{ asset('/promotores/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                console.log("resultados", data);
+                                response( data );
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.label )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        console.log(ui.item.label)
+                        $("#txtPromotor").val(ui.item.label);
+                        $("#hdnPromotor").val(ui.item.value);
+                        return false;
+                    },
+                });
 
-            $("#txtLocalidad").autocomplete({
-                source: function( request, response ) {
-                    $("#hdnLocalidad").val("");
-                    $.ajax({
-                        url: "{{ asset('/localidades/autocomplete') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            txtBusqueda: request.term
-                        },
-                        success: function( data ) {
-                            console.log("resultados", data);
-                            response( data );
-                        }
-                    });
-                },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.label )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
-                select: function( event, ui ) {
-                    console.log(ui.item.label)
-                    $("#txtLocalidad").val(ui.item.label);
-                    $("#hdnLocalidad").val(ui.item.value);
-                    return false;
-                },
-            });
+                $("#txtLocalidad").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnLocalidad").val("");
+                        $.ajax({
+                            url: "{{ asset('/localidades/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                console.log("resultados", data);
+                                response( data );
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.label )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        console.log(ui.item.label)
+                        $("#txtLocalidad").val(ui.item.label);
+                        $("#hdnLocalidad").val(ui.item.value);
+                        return false;
+                    },
+                });
 
-            $("#txtSeccion").autocomplete({
-                source: function( request, response ) {
-                    $("#hdnSeccion").val("");
-                    $.ajax({
-                        url: "{{ asset('/secciones/autocomplete') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            txtBusqueda: request.term
-                        },
-                        success: function( data ) {
-                            console.log("resultados", data);
-                            response( data );
-                        }
-                    });
-                },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.value )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
-                select: function( event, ui ) {
-                    console.log("select >>> ", ui);
-                    $("#txtSeccion").val(ui.item.label);
-                    $("#hdnSeccion").val(ui.item.value);
-                    return false;
-                },
-            });
+                $("#txtSeccion").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnSeccion").val("");
+                        $.ajax({
+                            url: "{{ asset('/secciones/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                console.log("resultados", data);
+                                response( data );
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.value )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        console.log("select >>> ", ui);
+                        $("#txtSeccion").val(ui.item.label);
+                        $("#hdnSeccion").val(ui.item.value);
+                        return false;
+                    },
+                });
+            // fin registros
+
+            // filtros
+                $( "#txtFechaInicio" ).datepicker({
+                    minDate: new Date(2021, 03, 1),
+                    prevText: "Anterior",
+                    nextText: "Siguiente",
+                    dateFormat: "dd/mm/yy",
+                });
+                $( "#txtFechaFin" ).datepicker({
+                    minDate: new Date(2021, 03, 1),
+                    prevText: "Anterior",
+                    nextText: "Siguiente",
+                    dateFormat: "dd/mm/yy",
+                });
+
+                $("#txtPromotor_filtro").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnPromotor_filtro").val("");
+                        enableInputLoading(document.getElementById('input-loading-promotor'));
+                        $.ajax({
+                            url: "{{ asset('/promotores/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-promotor'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-promotor'));
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.label )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        console.log(ui.item.label)
+                        $("#txtPromotor_filtro").val(ui.item.label);
+                        $("#hdnPromotor_filtro").val(ui.item.value);
+                        return false;
+                    },
+                });
+
+                $("#txtLocalidad_filtro").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnLocalidad_filtro").val("");
+                        enableInputLoading(document.getElementById('input-loading-localidad'));
+                        $.ajax({
+                            url: "{{ asset('/localidades/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.label )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        console.log(ui.item.label)
+                        $("#txtLocalidad_filtro").val(ui.item.label);
+                        $("#hdnLocalidad_filtro").val(ui.item.value);
+                        return false;
+                    },
+                });
+
+                $("#txtSeccion_filtro").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnSeccion_filtro").val("");
+                        enableInputLoading(document.getElementById('input-loading-seccion'));
+                        $.ajax({
+                            url: "{{ asset('/secciones/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.value )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        $("#txtSeccion_filtro").val(ui.item.label);
+                        $("#hdnSeccion_filtro").val(ui.item.value);
+                        return false;
+                    },
+                });
+            // fin filtros
+
+
         });
 
         function obtenerListaSimpatizantes() {
@@ -344,7 +523,14 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                data: {},
+                data: {
+                    nombre: document.getElementById('txtNombre_filtro').value.trim(),
+                    idPromotor: document.getElementById('hdnPromotor_filtro').value.trim(),
+                    idSeccion: document.getElementById('hdnSeccion_filtro').value.trim(),
+                    idLocalidad: document.getElementById('hdnLocalidad_filtro').value.trim(),
+                    fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
+                    fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
+                },
                 beforeSend: () => {
                     console.log("enviando");
                 },

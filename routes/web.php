@@ -43,8 +43,8 @@ Route::middleware(['isLogin'])->group(function () {
         Route::put('/secciones', [SeccionesController::class, 'guardar']);
         Route::delete('/secciones', [SeccionesController::class, 'eliminar']);
 
-        Route::get('/simpatizantes/reporte/pdf', [SimpatizantesController::class, 'descargarReporte']);
-        Route::get('/simpatizantes/reporte/xml', [SimpatizantesController::class, 'descargarReporte']);
+        Route::get('/simpatizantes/reporte/pdf', [SimpatizantesController::class, 'descargarReportePDF']);
+        Route::get('/simpatizantes/reporte/xlsx', [SimpatizantesController::class, 'descargarReporteXLSX']);
 
     });
 

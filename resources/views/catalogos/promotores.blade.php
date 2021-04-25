@@ -172,14 +172,63 @@
         </div>
     </div>
 
-    <!-- TABLA PROMOTORES -->
+    <!-- PROMOTORES -->
     <div class="row mt-4">
         <div class="col-12">
             <h5>Promotores registrados</h5>
         </div>
     </div>
 
-    <div style="height: 19px"></div>
+    <!-- FILTROS -->
+    <div class="row mt-5 mb-4">
+        <div class="col-xl-6 col-md-6 mb-2">
+            <label for="txtNombre_filtro" class="form-label">Promotor</label>
+            <input type="text" class="form-control" id="txtNombre_filtro" placeholder="Ingrese nombres, apellidos, curp, clave ine, número ine (busqueda libre)" value="" required="" autocomplete="off" onkeypress="">
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtLocalidad_filtro" class="form-label">Localidad</label>
+            <div class="input-group input-loading" id="input-loading-localidad">
+                <input type="text" class="form-control" id="txtLocalidad_filtro" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
+                <input type="hidden" id="hdnLocalidad_filtro">
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-2">
+            <label for="txtSeccion_filtro" class="form-label">Sección</label>
+            <div class="input-group input-loading" id="input-loading-seccion">
+                <input type="text" class="form-control" id="txtSeccion_filtro" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+                <input type="hidden" id="hdnSeccion_filtro">
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-6 mb-2">
+            <label for="txtSeccion" class="form-label">Fecha registro</label>
+            
+            <div class="input-group">
+                <input type="text" class="form-control" id="txtFechaInicio" placeholder="Fecha inicio (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)" value="@php echo date('d/m/Y') @endphp">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id=""> y </span>
+                </div>
+                <input type="text" class="form-control" id="txtFechaFin" placeholder="Fecha final (dia/mes/año)" autocomplete="off" onchange="validarFechaSeleccionada(this)">
+            </div>
+
+        </div>
+
+        <div class="col-xl-6 col-md-6 mb-2">
+            <button class="btn btn-primary btn-icon-split float-right" onclick="obtenerListaPromotores()" style="margin-top: 24px">
+                <span class="icon text-white-50">
+                    <i class="fas fa-search"></i>
+                </span>
+                <span class="text" style="min-width: 150px">Buscar</span>
+            </button>
+        </div>
+
+        <div class="col-12">
+            
+        </div>
+    </div>
+    <!-- FIN FILTROS -->
 
     <div class="row mt-2">
         <div class="col-12">
@@ -187,6 +236,7 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Fecha registro</th>
                         <th>CURP</th>
                         <th>Clave elector</th>
                         <th>Número elector</th>
@@ -272,6 +322,92 @@
                     return false;
                 },
             });
+
+            // Filtros
+            // filtros
+                $( "#txtFechaInicio" ).datepicker({
+                    minDate: new Date(2021, 03, 1),
+                    prevText: "Anterior",
+                    nextText: "Siguiente",
+                    dateFormat: "dd/mm/yy",
+                });
+
+                $( "#txtFechaFin" ).datepicker({
+                    minDate: new Date(2021, 03, 1),
+                    prevText: "Anterior",
+                    nextText: "Siguiente",
+                    dateFormat: "dd/mm/yy",
+                });
+
+                $("#txtLocalidad_filtro").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnLocalidad_filtro").val("");
+                        enableInputLoading(document.getElementById('input-loading-localidad'));
+                        $.ajax({
+                            url: "{{ asset('/localidades/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.label )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        console.log(ui.item.label)
+                        $("#txtLocalidad_filtro").val(ui.item.label);
+                        $("#hdnLocalidad_filtro").val(ui.item.value);
+                        return false;
+                    },
+                });
+
+                $("#txtSeccion_filtro").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnSeccion_filtro").val("");
+                        enableInputLoading(document.getElementById('input-loading-seccion'));
+                        $.ajax({
+                            url: "{{ asset('/secciones/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                            }
+                        });
+                    },
+                    _renderItem: function( ul, item ) {
+                        return $( "<li>" )
+                            .attr( "data-value", item.value )
+                            .append( item.label )
+                            .appendTo( ul );
+                    },
+                    select: function( event, ui ) {
+                        $("#txtSeccion_filtro").val(ui.item.label);
+                        $("#hdnSeccion_filtro").val(ui.item.value);
+                        return false;
+                    },
+                });
+            // fin filtros
         });
 
         function obtenerListaPromotores() {
@@ -281,7 +417,13 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                data: {},
+                data: {
+                    nombre: document.getElementById('txtNombre_filtro').value.trim(),
+                    idSeccion: document.getElementById('hdnSeccion_filtro').value.trim(),
+                    idLocalidad: document.getElementById('hdnLocalidad_filtro').value.trim(),
+                    fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
+                    fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
+                },
                 beforeSend: () => {
                     console.log("enviando");
                 },
@@ -293,13 +435,14 @@
                         arrayPromotores.forEach(promotor => {
                             html += `<tr>
                                 <td>${promotor.nombre} ${promotor.apellidoPaterno} ${promotor.apellidoMaterno}</td>
-                                <td>${promotor.curp}</td>
-                                <td>${promotor.claveElector}</td>
-                                <td>${promotor.numeroElector}</td>
-                                <td>${promotor.telefono}</td>
-                                <td>${armarDomicilio(promotor)} </td>
-                                <td>${promotor.localidad}</td>
-                                <td>${promotor.claveSeccion}</td>
+                                <td>${promotor.fechaHoraAlta || ''}</td>
+                                <td>${promotor.curp || ''}</td>
+                                <td>${promotor.claveElector || ''}</td>
+                                <td>${promotor.numeroElector || ''}</td>
+                                <td>${promotor.telefono || ''}</td>
+                                <td>${armarDomicilio(promotor) || ''} </td>
+                                <td>${promotor.localidad || ''}</td>
+                                <td>${promotor.claveSeccion || ''}</td>
                                 <td style="text-align: center">
                                     <button class="btn btn-primary btn-circle btn-sm" data-toggle="tooltip" data-placement="bottom" title="Editar" onclick="onClick_editarPromotor('${promotor.idPromotor}')">
                                         <i class="fas fa-edit"></i>

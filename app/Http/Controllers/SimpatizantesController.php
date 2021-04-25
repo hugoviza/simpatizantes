@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 
+use App\Exports\SimpatizantesExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class SimpatizantesController extends Controller
 {
     public function index(Request $request) {
@@ -15,130 +18,9 @@ class SimpatizantesController extends Controller
 
     public function listar(Request $request) {
 
-        $strFiltros = '';
-        $arrayValoresFiltros = array();
-        if($request->idSimpatizante != '') {
-            $strFiltros .= ' AND simp.idSimpatizante = ?';
-            array_push($arrayValoresFiltros, $request->idSimpatizante);
-        }
-
-        if($request->nombre != '') {
-            $strFiltros .= " AND concat(ifnull(simp.nombre,''), ' ', ifnull(simp.apellidoPaterno,''), ' ', ifnull(simp.apellidoMaterno,''), ' ', ifnull(simp.curp,''), ' ', ifnull(simp.claveElector,''), ' ', ifnull(simp.numeroElector,'')) regexp ?";
-            array_push($arrayValoresFiltros, str_replace(' ', '|', $request->nombre));
-        }
-
-        if($request->idPromotor != '') {
-            $strFiltros .= ' AND simp.idPromotor = ?';
-            array_push($arrayValoresFiltros, $request->idPromotor);
-        }
-
-        if($request->idSeccion != '') {
-            $strFiltros .= ' AND simp.idSeccion = ?';
-            array_push($arrayValoresFiltros, $request->idSeccion);
-        }
-
-        if($request->idLocalidad != '') {
-            $strFiltros .= ' AND simp.idLocalidad = ?';
-            array_push($arrayValoresFiltros, $request->idLocalidad);
-        }
-
-        if($request->fechaInicio != '') {
-            $strFiltros .= ' AND simp.fechaHoraAlta >= ?';
-            array_push($arrayValoresFiltros, "$request->fechaInicio 00:00:00");
-        }
-
-        if($request->fechaFin != '') {
-            $strFiltros .= ' AND simp.fechaHoraAlta <= ?';
-            array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
-        }
-
-        if($strFiltros != '') {
-            $promotores = DB::select(
-                "SELECT 
-                    simp.idSimpatizante,
-                    simp.idPromotor,
-                    simp.idLocalidad,
-                    simp.idSeccion,
-                    simp.idUsuario,
-                    ifnull(simp.nombre, '') nombre,
-                    ifnull(simp.apellidoMaterno, '') apellidoMaterno,
-                    ifnull(simp.apellidoPaterno, '') apellidoPaterno,
-                    ifnull(simp.domicilio, '') domicilio,
-                    ifnull(simp.numExt, '') numExt,
-                    ifnull(simp.numInt, '') numInt,
-                    ifnull(simp.colonia, '') colonia,
-                    ifnull(simp.codigoPostal, '') codigoPostal,
-                    ifnull(simp.claveElector, '') claveElector,
-                    ifnull(simp.numeroElector, '') numeroElector,
-                    ifnull(simp.curp, '') curp,
-                    ifnull(simp.telefono, '') telefono,
-                    ifnull(date_format(simp.fechaHoraAlta, '%d/%b/%Y %T'), '') fechaHoraAlta,
-                    ifnull(sec.claveSeccion, '') claveSeccion,
-                    ifnull(claveLocalidad, '') claveLocalidad,
-                    ifnull(loc.localidad, '') localidad,
-                    CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor,
-                    ifnull(GROUP_CONCAT(docs.url SEPARATOR '|sep|'), '') as docsURL,
-                    ifnull(GROUP_CONCAT(docs.nombre SEPARATOR '|sep|'), '') as docsNames
-                FROM
-                    tblsimpatizante AS simp
-                        LEFT JOIN
-                    tblseccion AS sec USING (idSeccion)
-                        LEFT JOIN
-                    tbllocalidad AS loc USING (idLocalidad)
-                        LEFT JOIN
-                    tblsimpatizante as prom on prom.idSimpatizante = simp.idPromotor
-                        LEFT JOIN
-                    tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
-                WHERE ifnull(simp.bitPromotor,0) <> 1
-                $strFiltros
-                GROUP BY idSimpatizante
-                order by simp.fechaHoraAlta", $arrayValoresFiltros);
-        } else {
-            // $limit = 
-            $promotores = DB::select(
-                "SELECT 
-                    simp.idSimpatizante,
-                    simp.idPromotor,
-                    simp.idLocalidad,
-                    simp.idSeccion,
-                    simp.idUsuario,
-                    ifnull(simp.nombre, '') nombre,
-                    ifnull(simp.apellidoMaterno, '') apellidoMaterno,
-                    ifnull(simp.apellidoPaterno, '') apellidoPaterno,
-                    ifnull(simp.domicilio, '') domicilio,
-                    ifnull(simp.numExt, '') numExt,
-                    ifnull(simp.numInt, '') numInt,
-                    ifnull(simp.colonia, '') colonia,
-                    ifnull(simp.codigoPostal, '') codigoPostal,
-                    ifnull(simp.claveElector, '') claveElector,
-                    ifnull(simp.numeroElector, '') numeroElector,
-                    ifnull(simp.curp, '') curp,
-                    ifnull(simp.telefono, '') telefono,
-                    ifnull(date_format(simp.fechaHoraAlta, '%d/%b/%Y %T'), '') fechaHoraAlta,
-                    ifnull(sec.claveSeccion, '') claveSeccion,
-                    ifnull(claveLocalidad, '') claveLocalidad,
-                    ifnull(loc.localidad, '') localidad,
-                    CONCAT(prom.nombre, ' ', prom.apellidoMaterno, ' ', prom.apellidoPaterno) promotor,
-                    ifnull(GROUP_CONCAT(docs.url SEPARATOR '|sep|'), '') as docsURL,
-                    ifnull(GROUP_CONCAT(docs.nombre SEPARATOR '|sep|'), '') as docsNames
-                FROM
-                    tblsimpatizante as simp
-                        LEFT JOIN
-                    tblseccion AS sec USING (idSeccion)
-                        LEFT JOIN
-                    tbllocalidad AS loc USING (idLocalidad)
-                        LEFT JOIN
-                    tblsimpatizante as prom on prom.idSimpatizante = simp.idPromotor
-                        LEFT JOIN
-                    tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
-                WHERE 
-                    ifnull(simp.bitPromotor,0) <> 1
-                GROUP BY idSimpatizante
-                order by simp.fechaHoraAlta
-                ");
-        }
-
-        return response()->json($promotores, 200);
+        $data = $this->consultaSimpatizantes($request);
+        
+        return response()->json($data, 200);
     }
 
     public function guardar(Request $request) {
@@ -350,7 +232,21 @@ class SimpatizantesController extends Controller
         //Storage::disk('local')->put('example.txt', 'Contents');
     }
 
-    public function descargarReporte(Request $request) {
+    public function descargarReportePDF(Request $request) {
+        $data = $this->consultaSimpatizantes($request);
+        $pdf = PDF::loadView('reportes.tablaSimpatizantes', ['data' => $data])->setPaper('a4', 'landscape');
+        // download PDF file with download method
+        return $pdf->stream('pdf_file.pdf');
+    }
+
+    public function descargarReporteXLSX(Request $request) {
+        $data = $this->consultaSimpatizantes($request);
+        $export = new SimpatizantesExport($data);
+    
+        return Excel::download($export, 'simpatizantes.xlsx');
+    }
+
+    function consultaSimpatizantes(Request $request) {
         $strFiltros = '';
         $arrayValoresFiltros = array();
         if($request->idSimpatizante != '') {
@@ -438,13 +334,6 @@ class SimpatizantesController extends Controller
             $strFiltros
             GROUP BY idSimpatizante", $arrayValoresFiltros);
 
-        // return view('reportes.tablaSimpatizantes', ['data' => $data]);
-
-        // share data to view
-        // view()->share('reportes.tablaSimpatizantes',$data);
-        $pdf = PDF::loadView('reportes.tablaSimpatizantes', ['data' => $data])->setPaper('a4', 'landscape');
-
-        // download PDF file with download method
-        return $pdf->stream('pdf_file.pdf');
+        return $data;
     }
 }

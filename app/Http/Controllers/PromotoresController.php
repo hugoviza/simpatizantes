@@ -12,69 +12,79 @@ class PromotoresController extends Controller
     }
 
     public function listar(Request $request) {
-
-        if(isset($request->idPromotor)) {
-            $promotores = DB::select(
-                "SELECT 
-                    idSimpatizante AS idPromotor,
-                    idLocalidad,
-                    idSeccion,
-                    idUsuario,
-                    ifnull(nombre, '') nombre,
-                    ifnull(apellidoMaterno, '') apellidoMaterno,
-                    ifnull(apellidoPaterno, '') apellidoPaterno,
-                    ifnull(domicilio, '') domicilio,
-                    ifnull(numExt, '') numExt,
-                    ifnull(numInt, '') numInt,
-                    ifnull(colonia, '') colonia,
-                    ifnull(codigoPostal, '') codigoPostal,
-                    ifnull(claveElector, '') claveElector,
-                    ifnull(numeroElector, '') numeroElector,
-                    ifnull(curp, '') curp,
-                    ifnull(telefono, '') telefono,
-                    ifnull(fechaHoraAlta, '') fechaHoraAlta,
-                    ifnull(sec.claveSeccion, '') claveSeccion,
-                    ifnull(claveLocalidad, '') claveLocalidad,
-                    ifnull(loc.localidad, '') localidad
-                FROM
-                    tblsimpatizante AS promotor
-                        LEFT JOIN
-                    tblseccion AS sec USING (idSeccion)
-                        LEFT JOIN
-                    tbllocalidad AS loc USING (idLocalidad)
-                WHERE idSimpatizante = ?", [$request->idPromotor]);
-        } else {
-            // $limit = 
-            $promotores = DB::select(
-                "SELECT 
-                    idSimpatizante AS idPromotor,
-                    idLocalidad,
-                    idSeccion,
-                    idUsuario,
-                    ifnull(nombre, '') nombre,
-                    ifnull(apellidoMaterno, '') apellidoMaterno,
-                    ifnull(apellidoPaterno, '') apellidoPaterno,
-                    ifnull(domicilio, '') domicilio,
-                    ifnull(numExt, '') numExt,
-                    ifnull(numInt, '') numInt,
-                    ifnull(colonia, '') colonia,
-                    ifnull(codigoPostal, '') codigoPostal,
-                    ifnull(claveElector, '') claveElector,
-                    ifnull(numeroElector, '') numeroElector,
-                    ifnull(curp, '') curp,
-                    ifnull(telefono, '') telefono,
-                    ifnull(fechaHoraAlta, '') fechaHoraAlta,
-                    ifnull(sec.claveSeccion, '') claveSeccion,
-                    ifnull(claveLocalidad, '') claveLocalidad,
-                    ifnull(loc.localidad, '') localidad
-                FROM
-                    tblsimpatizante AS promotor
-                        LEFT JOIN
-                    tblseccion AS sec USING (idSeccion)
-                        LEFT JOIN
-                    tbllocalidad AS loc USING (idLocalidad)
-                WHERE bitPromotor = 1");
+        $strFiltros = '';
+        $arrayValoresFiltros = array();
+        if($request->idPromotor != '') {
+            $strFiltros .= ' AND promotor.idSimpatizante = ?';
+            array_push($arrayValoresFiltros, $request->idPromotor);
         }
+
+        if($request->nombre != '') {
+            $strFiltros .= " AND concat(ifnull(promotor.nombre,''), ' ', ifnull(promotor.apellidoPaterno,''), ' ', ifnull(promotor.apellidoMaterno,''), ' ', ifnull(promotor.curp,''), ' ', ifnull(promotor.claveElector,''), ' ', ifnull(promotor.numeroElector,'')) regexp ?";
+            array_push($arrayValoresFiltros, str_replace(' ', '|', $request->nombre));
+        }
+
+        if($request->idSeccion != '') {
+            $strFiltros .= ' AND promotor.idSeccion = ?';
+            array_push($arrayValoresFiltros, $request->idSeccion);
+        }
+
+        if($request->idLocalidad != '') {
+            $strFiltros .= ' AND promotor.idLocalidad = ?';
+            array_push($arrayValoresFiltros, $request->idLocalidad);
+        }
+
+        if($request->fechaInicio != '') {
+            $strFiltros .= ' AND promotor.fechaHoraAlta >= ?';
+            array_push($arrayValoresFiltros, "$request->fechaInicio 00:00:00");
+        }
+
+        if($request->fechaFin != '') {
+            $strFiltros .= ' AND promotor.fechaHoraAlta <= ?';
+            array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
+        }
+
+        if($request->fechaInicio != '') {
+            $strFiltros .= ' AND promotor.fechaHoraAlta >= ?';
+            array_push($arrayValoresFiltros, "$request->fechaInicio 00:00:00");
+        }
+
+        if($request->fechaFin != '') {
+            $strFiltros .= ' AND promotor.fechaHoraAlta <= ?';
+            array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
+        }
+        
+
+            $promotores = DB::select(
+                "SELECT 
+                    idSimpatizante AS idPromotor,
+                    idLocalidad,
+                    idSeccion,
+                    idUsuario,
+                    ifnull(nombre, '') nombre,
+                    ifnull(apellidoMaterno, '') apellidoMaterno,
+                    ifnull(apellidoPaterno, '') apellidoPaterno,
+                    ifnull(domicilio, '') domicilio,
+                    ifnull(numExt, '') numExt,
+                    ifnull(numInt, '') numInt,
+                    ifnull(colonia, '') colonia,
+                    ifnull(codigoPostal, '') codigoPostal,
+                    ifnull(claveElector, '') claveElector,
+                    ifnull(numeroElector, '') numeroElector,
+                    ifnull(curp, '') curp,
+                    ifnull(telefono, '') telefono,
+                    ifnull(fechaHoraAlta, '') fechaHoraAlta,
+                    ifnull(sec.claveSeccion, '') claveSeccion,
+                    ifnull(claveLocalidad, '') claveLocalidad,
+                    ifnull(loc.localidad, '') localidad
+                FROM
+                    tblsimpatizante AS promotor
+                        LEFT JOIN
+                    tblseccion AS sec USING (idSeccion)
+                        LEFT JOIN
+                    tbllocalidad AS loc USING (idLocalidad)
+                WHERE ifnull(promotor.bitPromotor,0) = 1
+                {$strFiltros}", $arrayValoresFiltros);
 
         return response()->json($promotores, 200);
     }
