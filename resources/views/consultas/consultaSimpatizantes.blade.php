@@ -123,8 +123,8 @@
             </div>
         </div>
 
-        <div class="col-12">
-            <a href="#" class="btn btn-primary btn-icon-split float-right" onclick="listarSimpatizantes()">
+        <div class="col-xl-3 col-md-6 mb-2">
+            <a href="#" class="btn btn-primary btn-icon-split float-right" onclick="listarSimpatizantes()" style="margin-top: 24px">
                 <span class="icon text-white-50">
                     <i class="fas fa-search"></i>
                 </span>
