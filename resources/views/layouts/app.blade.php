@@ -175,12 +175,12 @@
                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="{{ asset('login') }}">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
+                                    Cerrar sesión
                                 </a>
-                                <a class="dropdown-item" href="{{ asset('login') }}">
+                                <a class="dropdown-item" href="@php echo str_replace('localhost', gethostbyname(trim(`hostname`)), asset('/') ) @endphp">
                                     @if ($session->get('nivelAcceso') === 'admin')
                                         <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Mi ip: @php echo  gethostbyname(trim(`hostname`)); @endphp
+                                        Ruta de acceso en red local: <b>@php echo str_replace('localhost', gethostbyname(trim(`hostname`)), asset('/') ) @endphp</b>
                                     @endif
                                 </a>
                             </div>
