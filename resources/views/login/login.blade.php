@@ -13,7 +13,7 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="{{ asset('plantilla_admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('plantilla_admin/css/sb-admin-2.css') }}" rel="stylesheet">
 </head>
 <body class="bg-gradient-light">
 
@@ -24,11 +24,13 @@
 
             <div class="col-xl-10 col-lg-12 col-md-9">
 
-                <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card o-hidden border-0 shadow-lg my-5" style="border-radius: 46px 0 0 46px">
                     <div class="card-body p-0">
                         <!-- Nested Row within Card Body -->
                         <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block" style="background-image: url({{ asset('logo.jpg') }})"></div>
+                            <div class="col-lg-6 d-none d-lg-block">
+                                <img src="{{ asset('logo.png') }}" alt="Logo" style="width: 100%">
+                            </div>
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">

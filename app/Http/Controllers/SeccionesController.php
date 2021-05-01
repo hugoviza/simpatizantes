@@ -86,7 +86,7 @@ class SeccionesController extends Controller
     public function autocomplete(Request $request) {
         $resultados = DB::select(
             "SELECT 
-                claveSeccion AS label, idSeccion AS value
+                claveSeccion AS value, idSeccion
             FROM
                 tblseccion
             WHERE

@@ -132,18 +132,22 @@
                             </div>
                             <div class="col-sm-12 col-md-4 mb-3">
                                 <label for="txtLocalidad" class="form-label">Localidad*</label>
-                                <input type="text" class="form-control" id="txtLocalidad" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
-                                <input type="hidden" id="hdnLocalidad">
+                                <div class="input-group input-loading" id="input-loading-localidad">
+                                    <input type="text" class="form-control reset-hdn-onchange" id="txtLocalidad" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
+                                    <input type="hidden" id="hdnLocalidad">
+                                </div>
                                 <div class="invalid-feedback">
-                                    Se requiere ingresar localidad de promotor.
+                                    Se requiere seleccionar localidad válida.
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-4 mb-3">
                                 <label for="txtSeccion" class="form-label">Sección*</label>
-                                <input type="text" class="form-control" id="txtSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
-                                <input type="hidden" id="hdnSeccion">
+                                <div class="input-group input-loading reset-hdn-onchange" id="input-loading-seccion">
+                                    <input type="text" class="form-control" id="txtSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+                                    <input type="hidden" id="hdnSeccion">
+                                </div>
                                 <div class="invalid-feedback">
-                                    Se requiere ingresar clave de sección de promotor.
+                                    Se requiere ingresar clave de sección válida.
                                 </div>
                             </div>
                         </div>
@@ -188,16 +192,16 @@
 
         <div class="col-xl-3 col-md-6 mb-2">
             <label for="txtLocalidad_filtro" class="form-label">Localidad</label>
-            <div class="input-group input-loading" id="input-loading-localidad">
-                <input type="text" class="form-control" id="txtLocalidad_filtro" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
+            <div class="input-group input-loading" id="input-loading-localidad-filtro">
+                <input type="text" class="form-control reset-hdn-onchange" id="txtLocalidad_filtro" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
                 <input type="hidden" id="hdnLocalidad_filtro">
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6 mb-2">
             <label for="txtSeccion_filtro" class="form-label">Sección</label>
-            <div class="input-group input-loading" id="input-loading-seccion">
-                <input type="text" class="form-control" id="txtSeccion_filtro" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+            <div class="input-group input-loading reset-hdn-onchange" id="input-loading-seccion-filtro">
+                <input type="text" class="form-control reset-hdn-onchange" id="txtSeccion_filtro" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
                 <input type="hidden" id="hdnSeccion_filtro">
             </div>
         </div>
@@ -259,69 +263,75 @@
     <script>
 
         $(document).ready(() => {
+
+            // reseteamos los hdn cuando cambie el texto
+            $(".reset-hdn-onchange").change((event) => {
+                if(event.currentTarget.value.trim() == '') {
+                    let idInput = event.currentTarget.getAttribute('id');
+                    let idInputHdn = idInput ? idInput.replace('txt', 'hdn') : undefined;
+                    let inputHdn = document.getElementById(idInputHdn);
+
+                    if(inputHdn) {
+                        inputHdn.value = '';
+                    }
+                }
+            });
+            
             obtenerListaPromotores();
 
-            $("#txtLocalidad").autocomplete({
-                source: function( request, response ) {
-                    $("#hdnLocalidad").val("");
-                    $.ajax({
-                        url: "{{ asset('/localidades/autocomplete') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            txtBusqueda: request.term
-                        },
-                        success: function( data ) {
-                            console.log("resultados", data);
-                            response( data );
-                        }
-                    });
-                },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.label )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
-                select: function( event, ui ) {
-                    console.log(ui.item.label)
-                    $("#txtLocalidad").val(ui.item.label);
-                    $("#hdnLocalidad").val(ui.item.value);
-                    return false;
-                },
-            });
+            // registro
+                $("#txtLocalidad").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnLocalidad").val("");
+                        enableInputLoading(document.getElementById('input-loading-localidad'));
+                        $.ajax({
+                            url: "{{ asset('/localidades/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                            }
+                        });
+                    },
+                    select: function( event, ui ) {
+                        $("#hdnLocalidad").val(ui.item.idLocalidad);
+                    },
+                });
 
-            $("#txtSeccion").autocomplete({
-                source: function( request, response ) {
-                    $("#hdnSeccion").val("");
-                    $.ajax({
-                        url: "{{ asset('/secciones/autocomplete') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            txtBusqueda: request.term
-                        },
-                        success: function( data ) {
-                            console.log("resultados", data);
-                            response( data );
-                        }
-                    });
-                },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.value )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
-                select: function( event, ui ) {
-                    console.log("select >>> ", ui);
-                    $("#txtSeccion").val(ui.item.label);
-                    $("#hdnSeccion").val(ui.item.value);
-                    return false;
-                },
-            });
+                $("#txtSeccion").autocomplete({
+                    source: function( request, response ) {
+                        $("#hdnSeccion").val("");
+                        enableInputLoading(document.getElementById('input-loading-seccion'));
+                        $.ajax({
+                            url: "{{ asset('/secciones/autocomplete') }}",
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                txtBusqueda: request.term
+                            },
+                            success: function( data ) {
+                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                                response( data );
+                            },
+                            error: () => {
+                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                            }
+                        });
+                    },
+                    select: function( event, ui ) {
+                        $("#hdnSeccion").val(ui.item.idSeccion);
+                    },
+                });
+            // registro
 
             // Filtros
             // filtros
@@ -342,7 +352,7 @@
                 $("#txtLocalidad_filtro").autocomplete({
                     source: function( request, response ) {
                         $("#hdnLocalidad_filtro").val("");
-                        enableInputLoading(document.getElementById('input-loading-localidad'));
+                        enableInputLoading(document.getElementById('input-loading-localidad-filtro'));
                         $.ajax({
                             url: "{{ asset('/localidades/autocomplete') }}",
                             headers: {
@@ -352,32 +362,23 @@
                                 txtBusqueda: request.term
                             },
                             success: function( data ) {
-                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                                disableInputLoading(document.getElementById('input-loading-localidad-filtro'));
                                 response( data );
                             },
                             error: () => {
-                                disableInputLoading(document.getElementById('input-loading-localidad'));
+                                disableInputLoading(document.getElementById('input-loading-localidad-filtro'));
                             }
                         });
                     },
-                    _renderItem: function( ul, item ) {
-                        return $( "<li>" )
-                            .attr( "data-value", item.label )
-                            .append( item.label )
-                            .appendTo( ul );
-                    },
                     select: function( event, ui ) {
-                        console.log(ui.item.label)
-                        $("#txtLocalidad_filtro").val(ui.item.label);
-                        $("#hdnLocalidad_filtro").val(ui.item.value);
-                        return false;
+                        $("#hdnLocalidad_filtro").val(ui.item.idLocalidad);
                     },
                 });
 
                 $("#txtSeccion_filtro").autocomplete({
                     source: function( request, response ) {
                         $("#hdnSeccion_filtro").val("");
-                        enableInputLoading(document.getElementById('input-loading-seccion'));
+                        enableInputLoading(document.getElementById('input-loading-seccion-filtro'));
                         $.ajax({
                             url: "{{ asset('/secciones/autocomplete') }}",
                             headers: {
@@ -387,24 +388,16 @@
                                 txtBusqueda: request.term
                             },
                             success: function( data ) {
-                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                                disableInputLoading(document.getElementById('input-loading-seccion-filtro'));
                                 response( data );
                             },
                             error: () => {
-                                disableInputLoading(document.getElementById('input-loading-seccion'));
+                                disableInputLoading(document.getElementById('input-loading-seccion-filtro'));
                             }
                         });
                     },
-                    _renderItem: function( ul, item ) {
-                        return $( "<li>" )
-                            .attr( "data-value", item.value )
-                            .append( item.label )
-                            .appendTo( ul );
-                    },
                     select: function( event, ui ) {
-                        $("#txtSeccion_filtro").val(ui.item.label);
-                        $("#hdnSeccion_filtro").val(ui.item.value);
-                        return false;
+                        $("#hdnSeccion_filtro").val(ui.item.idSeccion);
                     },
                 });
             // fin filtros

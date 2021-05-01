@@ -205,8 +205,8 @@ class SimpatizantesController extends Controller
 
         $arraySimpatizantes = DB::select(
             "SELECT 
-                CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) as label,
-                idSimpatizante as value
+                CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) as value,
+                idSimpatizante
             FROM tblsimpatizante 
             WHERE CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) REGEXP '$busqueda' 
             AND ifnull(bitPromotor, 0) <> 1 order by CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno); "
@@ -248,6 +248,7 @@ class SimpatizantesController extends Controller
 
     function consultaSimpatizantes(Request $request) {
         $strFiltros = '';
+        $strOrdenamiento = '';
         $arrayValoresFiltros = array();
         if($request->idSimpatizante != '') {
             $strFiltros .= ' AND simp.idSimpatizante = ?';
@@ -294,6 +295,25 @@ class SimpatizantesController extends Controller
             array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
         }
 
+        if($request->session()->get('nivelAcceso') != 'admin') {
+            $strFiltros .= ' AND simp.idUsuario = ?';
+            array_push($arrayValoresFiltros, $request->session()->get('idUsuario'));
+        }
+
+        if($request->orderBy != '') {
+            $arrayOrderBy = explode(',', $request->orderBy);
+            // arrayOrderBy[0] = campo por ordenar
+            // arrayOrderBy[1] = orden asc o desc
+            switch($arrayOrderBy[0]) {
+                case 'nombre':
+                    $strOrdenamiento = " ORDER BY CONCAT(simp.nombre, ' ', simp.apellidoPaterno, ' ', simp.apellidoMaterno) {$arrayOrderBy[1]}";
+                    break;
+                case 'fechaAlta':
+                    $strOrdenamiento = " ORDER BY fechaHoraAlta {$arrayOrderBy[1]}";
+                    break;
+            }
+        }
+
         $data = DB::select(
             "SELECT 
                 simp.idSimpatizante,
@@ -332,7 +352,8 @@ class SimpatizantesController extends Controller
                 tblsimpatizantedocumento as docs on docs.idSimpatizante = simp.idSimpatizante
             WHERE ifnull(simp.bitPromotor,0) <> 1
             $strFiltros
-            GROUP BY idSimpatizante", $arrayValoresFiltros);
+            GROUP BY idSimpatizante
+            $strOrdenamiento", $arrayValoresFiltros);
 
         return $data;
     }

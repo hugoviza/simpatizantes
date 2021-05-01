@@ -93,8 +93,8 @@ class LocalidadesController extends Controller
         $busqueda = str_replace(' ', '|', $request->txtBusqueda);
         $resultados = DB::select(
             "SELECT 
-                CONCAT(claveLocalidad, ' ', localidad) AS label,
-                idLocalidad AS value
+                CONCAT(claveLocalidad, ' ', localidad) AS value,
+                idLocalidad
             FROM
                 tbllocalidad
             WHERE

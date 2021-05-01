@@ -89,7 +89,7 @@
         <div class="col-xl-3 col-md-6 mb-2">
             <label for="txtPromotor" class="form-label">Promotor</label>
             <div class="input-group input-loading" id="input-loading-promotor">
-                <input type="text" class="form-control" id="txtPromotor" placeholder="Ingrese nombre promotor" value="" required="" autocomplete="off" onkeypress="">
+                <input type="text" class="form-control reset-hdn-onchange" id="txtPromotor" placeholder="Ingrese nombre promotor" value="" required="" autocomplete="off" onkeypress="">
                 <input type="hidden" id="hdnPromotor">
             </div>
         </div>
@@ -97,7 +97,7 @@
         <div class="col-xl-3 col-md-6 mb-2">
             <label for="txtLocalidad" class="form-label">Localidad</label>
             <div class="input-group input-loading" id="input-loading-localidad">
-                <input type="text" class="form-control" id="txtLocalidad" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
+                <input type="text" class="form-control reset-hdn-onchange" id="txtLocalidad" placeholder="Ingrese localidad" value="" required="" autocomplete="off" onkeypress="">
                 <input type="hidden" id="hdnLocalidad">
             </div>
         </div>
@@ -118,12 +118,22 @@
         <div class="col-xl-3 col-md-6 mb-2">
             <label for="txtSeccion" class="form-label">Sección</label>
             <div class="input-group input-loading" id="input-loading-seccion">
-                <input type="text" class="form-control" id="txtSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
+                <input type="text" class="form-control reset-hdn-onchange" id="txtSeccion" placeholder="Ingrese clave de sección" value="" required="" autocomplete="off" onkeypress="return isNumber(event)">
                 <input type="hidden" id="hdnSeccion">
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6 mb-2">
+            <label for="lstOrdenamiento" class="form-label">Ordenar por</label>
+            <select id="lstOrdenamiento" class="form-control">
+                <option value="nombre,asc">Nombre ascendente</option>
+                <option value="nombre,desc">Nombre descendente</option>
+                <option value="fechaAlta,asc">Fecha registro ascendente</option>
+                <option value="fechaAlta,desc">Fecha registro descendente</option>
+            </select>
+        </div>
+
+        <div class="col-12 mb-2">
             <a href="#" class="btn btn-primary btn-icon-split float-right" onclick="listarSimpatizantes()" style="margin-top: 24px">
                 <span class="icon text-white-50">
                     <i class="fas fa-search"></i>
@@ -181,6 +191,20 @@
 
     <script>
         $(document).ready(() => {
+            
+            // reseteamos los hdn cuando cambie el texto
+            $(".reset-hdn-onchange").change((event) => {
+                if(event.currentTarget.value.trim() == '') {
+                    let idInput = event.currentTarget.getAttribute('id');
+                    let idInputHdn = idInput ? idInput.replace('txt', 'hdn') : undefined;
+                    let inputHdn = document.getElementById(idInputHdn);
+
+                    if(inputHdn) {
+                        inputHdn.value = '';
+                    }
+                }
+            });
+
             listarSimpatizantes();
 
             $( "#txtFechaInicio" ).datepicker({
@@ -189,6 +213,7 @@
                 nextText: "Siguiente",
                 dateFormat: "dd/mm/yy",
             });
+            
             $( "#txtFechaFin" ).datepicker({
                 minDate: new Date(2021, 03, 1),
                 prevText: "Anterior",
@@ -217,17 +242,8 @@
                         }
                     });
                 },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.label )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
                 select: function( event, ui ) {
-                    console.log(ui.item.label)
-                    $("#txtPromotor").val(ui.item.label);
-                    $("#hdnPromotor").val(ui.item.value);
-                    return false;
+                    $("#hdnPromotor").val(ui.item.idPromotor);
                 },
             });
 
@@ -252,17 +268,8 @@
                         }
                     });
                 },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.label )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
                 select: function( event, ui ) {
-                    console.log(ui.item.label)
-                    $("#txtLocalidad").val(ui.item.label);
-                    $("#hdnLocalidad").val(ui.item.value);
-                    return false;
+                    $("#hdnLocalidad").val(ui.item.idLocalidad);
                 },
             });
 
@@ -287,17 +294,8 @@
                         }
                     });
                 },
-                _renderItem: function( ul, item ) {
-                    return $( "<li>" )
-                        .attr( "data-value", item.value )
-                        .append( item.label )
-                        .appendTo( ul );
-                },
                 select: function( event, ui ) {
-                    console.log("select >>> ", ui);
-                    $("#txtSeccion").val(ui.item.label);
-                    $("#hdnSeccion").val(ui.item.value);
-                    return false;
+                    $("#hdnSeccion").val(ui.item.idSeccion);
                 },
             });
         });
@@ -317,6 +315,7 @@
                     idLocalidad: document.getElementById('hdnLocalidad').value.trim(),
                     fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
                     fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
+                    orderBy: document.getElementById('lstOrdenamiento').value,
                 },
                 beforeSend: () => {
                     console.log("enviando");
@@ -356,7 +355,7 @@
                         tableBody.innerHTML = html;
                         $('[data-toggle="tooltip"]').tooltip();
                     } else {
-                        tableBody.innerHTML = `<tr><td colspan="10">No se encontraron simpatizantes</td></tr>`;
+                        tableBody.innerHTML = `<tr><td colspan="11">No se encontraron simpatizantes</td></tr>`;
                     }
                     swal.close();
                 },
@@ -375,6 +374,7 @@
                     idLocalidad: document.getElementById('hdnLocalidad').value.trim(),
                     fechaInicio: toDateSQL(document.getElementById('txtFechaInicio').value.trim()),
                     fechaFin: toDateSQL(document.getElementById('txtFechaFin').value.trim()),
+                    orderBy: document.getElementById('lstOrdenamiento').value,
                 });
             if(tipoReporte == 'xlsx') {
                 var link = document.createElement('a');

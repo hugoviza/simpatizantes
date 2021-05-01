@@ -53,6 +53,11 @@ class PromotoresController extends Controller
             $strFiltros .= ' AND promotor.fechaHoraAlta <= ?';
             array_push($arrayValoresFiltros, "$request->fechaFin 23:59:59");
         }
+
+        if($request->session()->get('nivelAcceso') != 'admin') {
+            $strFiltros .= ' AND promotor.idUsuario = ?';
+            array_push($arrayValoresFiltros, $request->session()->get('idUsuario'));
+        }
         
 
             $promotores = DB::select(
@@ -204,8 +209,8 @@ class PromotoresController extends Controller
 
         $arrayPromotores = DB::select(
             "SELECT 
-                CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) as label,
-                idSimpatizante as value
+                CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) as value,
+                idSimpatizante as idPromotor
             FROM tblsimpatizante 
             WHERE CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) REGEXP '$busqueda' 
             AND bitPromotor = 1 order by CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno); "

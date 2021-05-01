@@ -48,11 +48,6 @@ Route::middleware(['isLogin'])->group(function () {
 
     });
 
-    //LIVE SEARCH
-    Route::get('/promotores/autocomplete', [PromotoresController::class, 'autocomplete']);
-    Route::get('/localidades/autocomplete', [LocalidadesController::class, 'autocomplete']);
-    Route::get('/secciones/autocomplete', [SeccionesController::class, 'autocomplete']);
-
     //SIMPATIZANTES
     Route::get('/simpatizantes', [SimpatizantesController::class, 'index'])->name('simpatizantes');
     Route::post('/simpatizantes', [SimpatizantesController::class, 'listar']);
@@ -66,9 +61,12 @@ Route::middleware(['isLogin'])->group(function () {
     Route::put('/promotores', [PromotoresController::class, 'guardar']);
     Route::delete('/promotores', [PromotoresController::class, 'eliminar']);
 
-    
-
 });
+
+//LIVE SEARCH
+Route::get('/promotores/autocomplete', [PromotoresController::class, 'autocomplete']);
+Route::get('/localidades/autocomplete', [LocalidadesController::class, 'autocomplete']);
+Route::get('/secciones/autocomplete', [SeccionesController::class, 'autocomplete']);
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

@@ -1,0 +1,53 @@
+/* custom */
+        .bg-gradient-primary {
+                background-color: #6f42c1;
+                background-image: linear-gradient( 180deg ,#522B9B 10%,#6f42c1 100%);
+                background-size: cover;
+        }
+
+        .btn-primary {
+            /* color: #fff; */
+            background-color: #522B9B!important;
+            border-color: #522B9B!important;
+        }
+
+        .btn-primary:hover {
+            /* color: #fff; */
+            background-color: #6f42c1!important;
+            border-color: #6f42c1!important;
+        }
+
+        .btn-primary:focus, .btn-primary.focus {
+            color: #fff;
+            background-color: #2e59d9;
+            border-color: #2653d4;
+            box-shadow: 0 0 0 0.2rem rgba(105, 136, 228, 0.5);
+        }
+
+        .btn-primary.disabled, .btn-primary:disabled {
+            color: #fff;
+            background-color: #A094B6;
+            border-color: #A094B6;
+        }
+
+        .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
+            .show > .btn-primary.dropdown-toggle {
+            color: #fff;
+            background-color: #2653d4;
+            border-color: #244ec9;
+            }
+
+        .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
+            .show > .btn-primary.dropdown-toggle:focus {
+            box-shadow: 0 0 0 0.2rem rgba(105, 136, 228, 0.5);
+        }
+
+        .form-label {
+            margin-bottom: .2rem;            
+        }
+
+        .custom-file-label::after { content: "Seleccionar";}
+
+        .input-loading {
+            position: relative;
+        }
