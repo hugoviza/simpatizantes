@@ -209,11 +209,11 @@ class PromotoresController extends Controller
 
         $arrayPromotores = DB::select(
             "SELECT 
-                CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) as value,
+                CONCAT(nombre, ' ', apellidoPaterno, ' ', apellidoMaterno) as value,
                 idSimpatizante as idPromotor
             FROM tblsimpatizante 
-            WHERE CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno) REGEXP '$busqueda' 
-            AND bitPromotor = 1 order by CONCAT(nombre, ' ', apellidoMaterno, ' ', apellidoPaterno); "
+            WHERE CONCAT(nombre, ' ', apellidoPaterno, ' ', apellidoMaterno) REGEXP '$busqueda' 
+            AND bitPromotor = 1 order by CONCAT(nombre, ' ', apellidoPaterno, ' ', apellidoMaterno); "
         );
 
         return response()->json($arrayPromotores, 200);
